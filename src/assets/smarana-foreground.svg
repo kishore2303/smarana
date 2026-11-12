@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Safe-zone scaled for Android adaptive icon foreground -->
+  <g transform="translate(154, 154) scale(0.7)">
+    <g fill="#B99A55">
+      <circle cx="512" cy="172" r="22" fill="#E8C77B"/>
+      <circle cx="600" cy="184" r="15"/>
+      <circle cx="682" cy="218" r="15"/>
+      <circle cx="752" cy="272" r="15"/>
+      <circle cx="806" cy="342" r="15"/>
+      <circle cx="840" cy="424" r="15"/>
+      <circle cx="852" cy="512" r="15"/>
+      <circle cx="840" cy="600" r="15"/>
+      <circle cx="806" cy="682" r="15"/>
+      <circle cx="752" cy="752" r="15"/>
+      <circle cx="682" cy="806" r="15"/>
+      <circle cx="600" cy="840" r="15"/>
+      <circle cx="512" cy="852" r="15"/>
+      <circle cx="424" cy="840" r="15"/>
+      <circle cx="342" cy="806" r="15"/>
+      <circle cx="272" cy="752" r="15"/>
+      <circle cx="218" cy="682" r="15"/>
+      <circle cx="184" cy="600" r="15"/>
+      <circle cx="172" cy="512" r="15"/>
+      <circle cx="184" cy="424" r="15"/>
+      <circle cx="218" cy="342" r="15"/>
+      <circle cx="272" cy="272" r="15"/>
+      <circle cx="342" cy="218" r="15"/>
+      <circle cx="424" cy="184" r="15"/>
+    </g>
+    <g stroke="#172E27" stroke-width="8" stroke-linejoin="round">
+      <path d="M512 630 C420 620 315 550 285 450 C365 460 445 520 512 630 Z" fill="#B99A55"/>
+      <path d="M512 630 C604 620 709 550 739 450 C659 460 579 520 512 630 Z" fill="#B99A55"/>
+      <path d="M512 630 C445 570 385 460 390 345 C455 405 495 505 512 630 Z" fill="#D4B268"/>
+      <path d="M512 630 C579 570 639 460 634 345 C569 405 529 505 512 630 Z" fill="#D4B268"/>
+      <path d="M512 275 C572 375 572 505 512 630 C452 505 452 375 512 275 Z" fill="#E8C77B"/>
+    </g>
+    <path d="M350 675 Q512 725 674 675" fill="none" stroke="#E8C77B" stroke-width="18" stroke-linecap="round"/>
+  </g>
+</svg>

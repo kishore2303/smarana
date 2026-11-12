@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "Smarana",
+    "slug": "pradikshana-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#172E27"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.pradikshana.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#172E27",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-sqlite",
+      "./plugins/withPocketJapaService"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "4428224a-4907-472d-9646-58e110424c8d"
+      }
+    }
+  }
+}
