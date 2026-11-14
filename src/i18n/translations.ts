@@ -180,6 +180,8 @@ export interface TranslationStrings {
     meruPauseHint: string;
     malaHapticTitle: string;
     malaHapticDesc: string;
+    dailyPanchangamReminder: string;
+    dailyPanchangamReminderHint: string;
     notesTitle: string;
     notesBody: string;
   };
@@ -278,12 +280,18 @@ export interface TranslationStrings {
     personalDetails: string;
     personalDetailsHint: string;
     calendarButton: string;
+    shareWhatsApp: string;
+    shareShort: string;
+    shareSankalpamWhatsApp: string;
+    shareSuccess: string;
   };
   notifications: {
     pradakshinaTitle: string;
     japaTitle: string;
     pradakshinaUnit: string;
     japaUnit: string;
+    panchangaReminderTitle: string;
+    panchangaReminderBody: string;
   };
 }
 
@@ -487,6 +495,9 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       malaHapticTitle: 'Mala Completion Haptic',
       malaHapticDesc:
         'Play a gentle double-pulse vibration whenever a full Mala is completed.',
+      dailyPanchangamReminder: 'Daily Morning Panchangam (6:00 AM)',
+      dailyPanchangamReminderHint:
+        'Receive a gentle notification at 6:00 AM to view and share today\'s Panchangam on WhatsApp.',
       notesTitle: 'Android Background & Button Notes',
       notesBody:
         '• Back-tap detection currently runs while the app is open on screen.\n• Reliable locked-screen detection and hardware volume-button counting require a native Android build (Expo dev client) and foreground-service testing.',
@@ -589,12 +600,19 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       personalDetails: 'Personal Gotram & Name',
       personalDetailsHint: 'Customize Sankalpam with your Gotra and Sharma',
       calendarButton: 'Ugadi Calendar',
+      shareWhatsApp: 'Share on WhatsApp',
+      shareShort: 'Share',
+      shareSankalpamWhatsApp: 'Share Sankalpam on WhatsApp',
+      shareSuccess: 'Opening WhatsApp...',
     },
     notifications: {
       pradakshinaTitle: 'Pradakshina Complete',
       japaTitle: 'Japa Complete',
       pradakshinaUnit: 'Pradakshinas',
       japaUnit: 'repetitions',
+      panchangaReminderTitle: "Today's Panchangam",
+      panchangaReminderBody:
+        "Today's Tithi, Nakshatra, and timings are ready. Tap to share with family on WhatsApp.",
     },
   },
   te: {
@@ -796,6 +814,9 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       malaHapticTitle: 'మాల పూర్తయినప్పుడు హ్యాప్టిక్',
       malaHapticDesc:
         'ఒక మాల పూర్తయినప్పుడు సున్నితమైన డబుల్-పల్స్ వైబ్రేషన్ ఇస్తుంది.',
+      dailyPanchangamReminder: 'దినసరి ఉదయ పంచాంగం (6:00 AM)',
+      dailyPanchangamReminderHint:
+        'రోజూ ఉదయం 6:00 గంటలకు పంచాంగాన్ని వీక్షించడానికి మరియు వాట్సాప్‌లో షేర్ చేయడానికి గుర్తుచేస్తుంది.',
       notesTitle: 'ఆండ్రాయిడ్ బ్యాక్‌గ్రౌండ్ & బటన్ వివరాలు',
       notesBody:
         '• ప్రస్తుతం యాప్ స్క్రీన్‌పై తెరిచి ఉన్నప్పుడు బ్యాక్-ట్యాప్ పనిచేస్తుంది.\n• స్క్రీన్ లాక్‌లో మరియు వాల్యూమ్ బటన్ కౌంటింగ్ కోసం నేటివ్ ఆండ్రాయిడ్ బిల్డ్ అవసరం.',
@@ -898,12 +919,19 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       personalDetails: 'గోత్ర నామాలు (ఐచ్ఛికం)',
       personalDetailsHint: 'మీ గోత్రం మరియు పేరుతో సంకల్పాన్ని తయారుచేయండి',
       calendarButton: 'ఉగాది క్యాలెండర్',
+      shareWhatsApp: 'వాట్సాప్‌లో పంచాంగం షేర్ చేయండి',
+      shareShort: 'షేర్',
+      shareSankalpamWhatsApp: 'సంకల్పాన్ని వాట్సాప్‌లో షేర్ చేయండి',
+      shareSuccess: 'వాట్సాప్ తెరుస్తోంది...',
     },
     notifications: {
       pradakshinaTitle: 'ప్రదక్షిణ పూర్తయింది',
       japaTitle: 'జపం పూర్తయింది',
       pradakshinaUnit: 'ప్రదక్షిణలు',
       japaUnit: 'సార్లు',
+      panchangaReminderTitle: 'నేటి పంచాంగం సిద్ధంగా ఉంది',
+      panchangaReminderBody:
+        'నేటి తిథి, నక్షత్రం మరియు శుభ సమయాలను వాట్సాప్‌లో కుటుంబంతో షేర్ చేయండి.',
     },
   },
 };

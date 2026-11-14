@@ -16,6 +16,7 @@ import { getPracticeStats } from '../db/database';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAppMenu } from '../navigation/MenuContext';
 import { RootTabParamList } from '../navigation/types';
+import { sharePanchangaWhatsApp } from '../utils/panchangaShare';
 import { colors } from '../theme/colors';
 import { radii, spacing } from '../theme/tokens';
 import type { PracticeStats } from '../types/practice';
@@ -56,6 +57,10 @@ export function HomeScreen({ navigation }: Props) {
     }, [])
   );
 
+  const handleQuickWhatsAppShare = async () => {
+    await sharePanchangaWhatsApp(todayPanchanga, language);
+  };
+
   return (
     <View
       style={[
@@ -85,10 +90,27 @@ export function HomeScreen({ navigation }: Props) {
                 : `Sri ${todayPanchanga.samvatsara.english} · ${todayPanchanga.masa.english}`}
             </Text>
           </View>
-          <View style={styles.panchangaTodayPill}>
-            <Text style={styles.panchangaTodayPillText}>
-              {t.panchangam.today}
-            </Text>
+          <View style={styles.panchangaTopRight}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.panchangaWhatsAppBtn,
+                pressed && styles.panchangaWhatsAppBtnPressed,
+              ]}
+              onPress={handleQuickWhatsAppShare}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={t.panchangam.shareWhatsApp}
+            >
+              <TabIcon name="WhatsApp" color="#25D366" size={13} />
+              <Text style={styles.panchangaWhatsAppText}>
+                {t.panchangam.shareShort}
+              </Text>
+            </Pressable>
+            <View style={styles.panchangaTodayPill}>
+              <Text style={styles.panchangaTodayPillText}>
+                {t.panchangam.today}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -284,6 +306,31 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.8,
+  },
+  panchangaTopRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  panchangaWhatsAppBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(37, 211, 102, 0.12)',
+    borderColor: 'rgba(37, 211, 102, 0.5)',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+  },
+  panchangaWhatsAppBtnPressed: {
+    backgroundColor: 'rgba(37, 211, 102, 0.28)',
+    transform: [{ scale: 0.96 }],
+  },
+  panchangaWhatsAppText: {
+    color: '#25D366',
+    fontSize: 10,
+    fontWeight: '700',
   },
   panchangaTodayPill: {
     backgroundColor: 'rgba(212, 175, 55, 0.15)',
