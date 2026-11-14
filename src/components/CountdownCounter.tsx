@@ -23,6 +23,7 @@ import { MalaProgressRing } from './MalaProgressRing';
 import { getAppSettings } from '../db/database';
 import { computeMalaProgress } from '../engine/malaEngine';
 import { useBackTap } from '../engine/useBackTap';
+import { usePradakshinaLoop } from '../engine/usePradakshinaLoop';
 import { useLanguage } from '../i18n/LanguageContext';
 import { getTabBarStyle } from '../navigation/tabBarStyle';
 import type { RootTabParamList } from '../navigation/types';
@@ -160,6 +161,21 @@ export function CountdownCounter({
   }, [isCompleted, isDimMode, isPocketModeActive]);
 
   const lastNotifiedRef = useRef<string | null>(null);
+
+  const pradakshinaLoop = usePradakshinaLoop({
+    enabled: session.mode === 'pradakshina' && isSessionInProgress,
+    isPaused,
+    onLapDetected: onDecrement,
+  });
+
+  const handleFinishCalibration = () => {
+    const result = pradakshinaLoop.completeCalibration();
+    if (!result.success) {
+      if (result.error === 'TOO_FEW_STEPS') {
+        Alert.alert(t.pradakshina.autoLoopTitle, t.pradakshina.minStepsWarning);
+      }
+    }
+  };
 
   const malaProgress = computeMalaProgress({
     completedCount,
@@ -323,6 +339,7 @@ export function CountdownCounter({
         stopNativePocketMode();
         setIsPocketModeActive(false);
       }
+      pradakshinaLoop.reset();
       onReset();
     };
 
@@ -342,6 +359,7 @@ export function CountdownCounter({
         stopNativePocketMode();
         setIsPocketModeActive(false);
       }
+      pradakshinaLoop.reset();
       onClear();
     };
 
@@ -547,6 +565,13 @@ export function CountdownCounter({
           ]}
         >
           <Text style={styles.malaBadgeText}>{malaProgressText}</Text>
+        </View>
+      ) : null}
+      {session.mode === 'pradakshina' && pradakshinaLoop.phase === 'TRACKING' ? (
+        <View style={styles.pradakshinaAutoBadge}>
+          <Text style={styles.pradakshinaAutoBadgeText}>
+            ⚡ {t.pradakshina.calibratedBadge} · {pradakshinaLoop.currentLapSteps} / {pradakshinaLoop.profile?.baselineSteps} {t.pradakshina.stepsCount}
+          </Text>
         </View>
       ) : null}
       {currentNama && currentNamaText ? (
@@ -770,6 +795,89 @@ export function CountdownCounter({
         </View>
       ) : null}
 
+      {/* Smart Pradakshina Auto-Loop Card */}
+      {session.mode === 'pradakshina' ? (
+        <View style={styles.autoLoopBanner}>
+          {pradakshinaLoop.phase === 'IDLE' ? (
+            <View style={styles.autoLoopIdleRow}>
+              <View style={styles.autoLoopInfoCol}>
+                <Text style={styles.autoLoopTitleText}>
+                  ✨ {t.pradakshina.autoLoopTitle}
+                </Text>
+                <Text style={styles.autoLoopDescText} numberOfLines={2}>
+                  {t.pradakshina.autoLoopSubtitle}
+                </Text>
+              </View>
+              <Pressable
+                style={styles.calibrateActionBtn}
+                onPress={pradakshinaLoop.startCalibration}
+                accessibilityRole="button"
+              >
+                <Text style={styles.calibrateActionText}>
+                  {t.pradakshina.startCalibration}
+                </Text>
+              </Pressable>
+            </View>
+          ) : pradakshinaLoop.phase === 'CALIBRATING' ? (
+            <View style={styles.calibratingCard}>
+              <View style={styles.calibratingHeaderRow}>
+                <Text style={styles.calibratingStepsText}>
+                  👣 {pradakshinaLoop.currentLapSteps} {t.pradakshina.stepsCount}
+                </Text>
+                <View style={styles.calibratingPill}>
+                  <Text style={styles.calibratingPillText}>Round 1</Text>
+                </View>
+              </View>
+              <Text style={styles.calibratingHintText}>
+                {t.pradakshina.calibratingHint}
+              </Text>
+              <Pressable
+                style={styles.finishCalibrateBtn}
+                onPress={handleFinishCalibration}
+                accessibilityRole="button"
+              >
+                <Text style={styles.finishCalibrateBtnText}>
+                  {t.pradakshina.completeCalibration}
+                </Text>
+              </Pressable>
+            </View>
+          ) : (
+            <View style={styles.trackingCard}>
+              <View style={styles.trackingHeaderRow}>
+                <Text style={styles.trackingTitleText}>
+                  ⚡ {t.pradakshina.calibratedBadge} ({pradakshinaLoop.profile?.baselineSteps} {t.pradakshina.stepsCount})
+                </Text>
+                <Pressable
+                  style={styles.recalibrateSmallBtn}
+                  onPress={pradakshinaLoop.startCalibration}
+                  hitSlop={8}
+                >
+                  <Text style={styles.recalibrateSmallText}>
+                    {t.pradakshina.recalibrate}
+                  </Text>
+                </Pressable>
+              </View>
+              <View style={styles.lapProgressBar}>
+                <View
+                  style={[
+                    styles.lapProgressFill,
+                    { width: `${Math.round(pradakshinaLoop.lapProgress * 100)}%` },
+                  ]}
+                />
+              </View>
+              <View style={styles.trackingFooterRow}>
+                <Text style={styles.trackingCurrentSteps}>
+                  👣 {pradakshinaLoop.currentLapSteps} / {pradakshinaLoop.profile?.baselineSteps} {t.pradakshina.stepsCount}
+                </Text>
+                <Text style={styles.trackingPocketText} numberOfLines={1}>
+                  {t.pradakshina.pocketHint}
+                </Text>
+              </View>
+            </View>
+          )}
+        </View>
+      ) : null}
+
       <Pressable
         style={({ pressed }) => [
           styles.tapArea,
@@ -975,6 +1083,160 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontStyle: 'italic',
     textAlign: 'center',
+  },
+  pradakshinaAutoBadge: {
+    backgroundColor: '#0D241C',
+    borderColor: colors.gold,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 5,
+    marginTop: 8,
+  },
+  pradakshinaAutoBadgeText: {
+    color: colors.goldSoft,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  autoLoopBanner: {
+    marginTop: 10,
+    backgroundColor: colors.surface,
+    borderColor: 'rgba(212, 175, 55, 0.4)',
+    borderWidth: 1,
+    borderRadius: 14,
+    padding: 12,
+  },
+  autoLoopIdleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    gap: 10,
+  },
+  autoLoopInfoCol: {
+    flex: 1,
+  },
+  autoLoopTitleText: {
+    color: colors.goldSoft,
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  autoLoopDescText: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    lineHeight: 15,
+  },
+  calibrateActionBtn: {
+    backgroundColor: colors.earth,
+    borderColor: colors.gold,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
+  calibrateActionText: {
+    color: colors.goldSoft,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  calibratingCard: {
+    gap: 8,
+  },
+  calibratingHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  calibratingStepsText: {
+    color: colors.textPrimary,
+    fontSize: 16,
+    fontWeight: '800',
+  },
+  calibratingPill: {
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
+    borderColor: colors.gold,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  calibratingPillText: {
+    color: colors.goldSoft,
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  calibratingHintText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    lineHeight: 16,
+  },
+  finishCalibrateBtn: {
+    backgroundColor: colors.earth,
+    borderColor: colors.gold,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  finishCalibrateBtnText: {
+    color: colors.gold,
+    fontSize: 13,
+    fontWeight: '800',
+  },
+  trackingCard: {
+    gap: 6,
+  },
+  trackingHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  trackingTitleText: {
+    color: colors.goldSoft,
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  recalibrateSmallBtn: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    backgroundColor: colors.surfaceAlt,
+    borderColor: colors.border,
+    borderWidth: 1,
+  },
+  recalibrateSmallText: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  lapProgressBar: {
+    height: 6,
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginTop: 2,
+  },
+  lapProgressFill: {
+    height: '100%',
+    backgroundColor: colors.gold,
+    borderRadius: 3,
+  },
+  trackingFooterRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 2,
+  },
+  trackingCurrentSteps: {
+    color: colors.textPrimary,
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  trackingPocketText: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontStyle: 'italic',
   },
   namaPill: {
     backgroundColor: '#0D241C',

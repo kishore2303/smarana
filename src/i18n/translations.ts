@@ -45,6 +45,18 @@ export interface TranslationStrings {
     errorTemple: string;
     errorTarget: string;
     fallbackLabel: string;
+    autoLoopTitle: string;
+    autoLoopSubtitle: string;
+    manualMode: string;
+    autoLoopMode: string;
+    startCalibration: string;
+    completeCalibration: string;
+    calibratingHint: string;
+    calibratedBadge: string;
+    pocketHint: string;
+    stepsCount: string;
+    recalibrate: string;
+    minStepsWarning: string;
   };
   japa: {
     eyebrow: string;
@@ -323,6 +335,18 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       errorTemple: 'Please enter the temple name.',
       errorTarget: 'Please enter a valid target of 1 or more.',
       fallbackLabel: 'Temple Pradakshina',
+      autoLoopTitle: 'Smart Auto-Loop',
+      autoLoopSubtitle: 'Walk 1st round to calibrate. Phone auto-counts remaining rounds in pocket.',
+      manualMode: 'Manual Tap',
+      autoLoopMode: 'Auto-Loop',
+      startCalibration: '🚶‍♂️ Start Round 1 (Calibrate)',
+      completeCalibration: '✅ Finish Round 1 · Set Loop',
+      calibratingHint: 'Walk Round 1 around the shrine. Tap "Finish Round 1" when back at start.',
+      calibratedBadge: 'Loop Calibrated',
+      pocketHint: 'Keep phone in pocket. Phone will vibrate on every completed round.',
+      stepsCount: 'steps',
+      recalibrate: 'Re-calibrate',
+      minStepsWarning: 'Please walk at least 10 steps before setting loop.',
     },
     japa: {
       eyebrow: 'MANTRA REPETITION',
@@ -620,6 +644,18 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       errorTemple: 'దయచేసి ఆలయ పేరు నమోదు చేయండి.',
       errorTarget: 'దయచేసి 1 లేదా అంతకంటే ఎక్కువ సంఖ్యను నమోదు చేయండి.',
       fallbackLabel: 'ఆలయ ప్రదక్షిణ',
+      autoLoopTitle: 'స్మార్ట్ ఆటో-లూప్',
+      autoLoopSubtitle: 'మొదటి రౌండ్ పూర్తి చేసి లూప్ సెట్ చేయండి. మిగిలినవి జేబులో ఉంచినా యాప్ ఆటోమేటిక్‌గా లెక్కిస్తుంది.',
+      manualMode: 'సాధారణ ట్యాప్',
+      autoLoopMode: 'స్మార్ట్ ఆటో-లూప్',
+      startCalibration: '🚶‍♂️ మొదటి రౌండ్ ప్రారంభించు',
+      completeCalibration: '✅ రౌండ్ 1 పూర్తయింది · లూప్ సెట్ చేయి',
+      calibratingHint: 'గర్భగుడి చుట్టూ 1వ రౌండ్ నడవండి. ప్రారంభ స్థానానికి రాగానే "రౌండ్ 1 పూర్తయింది" నొక్కండి.',
+      calibratedBadge: 'లూప్ నమోదైంది',
+      pocketHint: 'ఫోన్ జేబులో ఉంచుకోండి. ప్రతి రౌండ్ పూర్తికాగానే వైబ్రేషన్ వస్తుంది.',
+      stepsCount: 'అడుగులు',
+      recalibrate: 'మళ్లీ సెట్ చేయి',
+      minStepsWarning: 'దయచేసి కనీసం 10 అడుగులు నడిచిన తర్వాత లూప్ సెట్ చేయండి.',
     },
     japa: {
       eyebrow: 'మంత్ర జపం',
