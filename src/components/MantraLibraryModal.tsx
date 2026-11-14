@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
   Alert,
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
@@ -12,6 +13,8 @@ import {
   View,
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { getDeityImage } from '../data/deityImages';
+import { TabIcon } from './TabIcon';
 import {
   deleteCustomMantra,
   getAllMantras,
@@ -37,19 +40,19 @@ interface MantraLibraryModalProps {
   visible: boolean;
   onClose: () => void;
   onSelectMantra: (mantra: MantraEntry) => void;
-  preferredScript: MantraScript;
-  onChangeScript: (script: MantraScript) => void;
+  preferredScript?: MantraScript;
+  onChangeScript?: (script: MantraScript) => void;
 }
 
 export function MantraLibraryModal({
   visible,
   onClose,
   onSelectMantra,
-  preferredScript,
-  onChangeScript,
+  preferredScript: propPreferredScript,
 }: MantraLibraryModalProps) {
   const insets = useSafeAreaInsets();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+  const preferredScript = propPreferredScript || (language === 'te' ? 'telugu' : 'english');
 
   const [mantras, setMantras] = useState<MantraEntry[]>([]);
   const [statsMap, setStatsMap] = useState<Record<string, MantraHistoryStats>>({});
@@ -175,59 +178,7 @@ export function MantraLibraryModal({
           </Pressable>
         </View>
 
-        {/* Script Selection Switcher */}
-        <View style={styles.scriptBar}>
-          <Pressable
-            style={[
-              styles.scriptTab,
-              preferredScript === 'sanskrit' && styles.scriptTabSelected,
-            ]}
-            onPress={() => onChangeScript('sanskrit')}
-          >
-            <Text
-              style={[
-                styles.scriptTabText,
-                preferredScript === 'sanskrit' && styles.scriptTabTextSelected,
-              ]}
-            >
-              {t.japa.sanskritTab}
-            </Text>
-          </Pressable>
 
-          <Pressable
-            style={[
-              styles.scriptTab,
-              preferredScript === 'telugu' && styles.scriptTabSelected,
-            ]}
-            onPress={() => onChangeScript('telugu')}
-          >
-            <Text
-              style={[
-                styles.scriptTabText,
-                preferredScript === 'telugu' && styles.scriptTabTextSelected,
-              ]}
-            >
-              {t.japa.teluguTab}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            style={[
-              styles.scriptTab,
-              preferredScript === 'english' && styles.scriptTabSelected,
-            ]}
-            onPress={() => onChangeScript('english')}
-          >
-            <Text
-              style={[
-                styles.scriptTabText,
-                preferredScript === 'english' && styles.scriptTabTextSelected,
-              ]}
-            >
-              {t.japa.englishTab}
-            </Text>
-          </Pressable>
-        </View>
 
         {/* Search & New Mantra Button */}
         <View style={styles.searchRow}>
@@ -397,15 +348,26 @@ export function MantraLibraryModal({
               ]}
               onPress={() => setActiveTab('ashtothram')}
             >
-              <Text
-                style={[
-                  styles.filterTabText,
-                  activeTab === 'ashtothram' && styles.filterTabTextSelected,
-                ]}
-              >
-                🌸 {t.ashtothram.title} (
-                {mantras.filter((m) => m.category === 'ashtothram').length})
-              </Text>
+              <View style={styles.tabInlineWrap}>
+                <TabIcon
+                  name="Ashtothram"
+                  color={
+                    activeTab === 'ashtothram'
+                      ? colors.goldSoft
+                      : colors.textSecondary
+                  }
+                  size={13}
+                />
+                <Text
+                  style={[
+                    styles.filterTabText,
+                    activeTab === 'ashtothram' && styles.filterTabTextSelected,
+                  ]}
+                >
+                  {t.ashtothram.title} (
+                  {mantras.filter((m) => m.category === 'ashtothram').length})
+                </Text>
+              </View>
             </Pressable>
 
             <Pressable
@@ -457,15 +419,32 @@ export function MantraLibraryModal({
                       onClose();
                     }}
                   >
-                    <View style={styles.mantraCardHeader}>
-                      <View style={styles.mantraTitleBlock}>
+                    <View style={styles.mantraCardRow}>
+                      {getDeityImage(mantra.id) ? (
+                        <Image
+                          source={getDeityImage(mantra.id)!}
+                          style={styles.cardDeityAvatar}
+                          resizeMode="cover"
+                        />
+                      ) : (
+                        <View style={styles.cardAvatarFallback}>
+                          <TabIcon
+                            name={
+                              mantra.category === 'ashtothram'
+                                ? 'Ashtothram'
+                                : 'MantraLibrary'
+                            }
+                            color={colors.goldSoft}
+                            size={18}
+                          />
+                        </View>
+                      )}
+
+                      <View style={styles.mantraMainInfo}>
                         <View style={styles.titleRow}>
-                          <Text style={styles.mantraName}>{mantra.name}</Text>
-                          {mantra.category === 'ashtothram' ? (
-                            <View style={styles.ashtothramBadge}>
-                              <Text style={styles.ashtothramBadgeText}>108</Text>
-                            </View>
-                          ) : null}
+                          <Text style={styles.mantraName} numberOfLines={1}>
+                            {mantra.name}
+                          </Text>
                           {!mantra.isBuiltIn ? (
                             <View style={styles.customBadge}>
                               <Text style={styles.customBadgeText}>
@@ -474,9 +453,24 @@ export function MantraLibraryModal({
                             </View>
                           ) : null}
                         </View>
-                        {mantra.deity ? (
-                          <Text style={styles.mantraDeity}>
+
+                        {displayText ? (
+                          <Text
+                            style={styles.scriptPreviewText}
+                            numberOfLines={1}
+                          >
+                            {displayText}
+                          </Text>
+                        ) : mantra.deity ? (
+                          <Text style={styles.deitySubText} numberOfLines={1}>
                             {mantra.deity}
+                          </Text>
+                        ) : null}
+
+                        {stats && stats.sessionsCount > 0 ? (
+                          <Text style={styles.compactStatsText}>
+                            {stats.sessionsCount} {t.japa.mantraStatsSessions} ·{' '}
+                            {stats.totalRepetitions} {t.japa.mantraStatsReps}
                           </Text>
                         ) : null}
                       </View>
@@ -489,7 +483,7 @@ export function MantraLibraryModal({
                           accessibilityLabel={
                             mantra.isFavorite ? 'Unfavorite' : 'Favorite'
                           }
-                          hitSlop={8}
+                          hitSlop={10}
                         >
                           <Text
                             style={[
@@ -505,44 +499,11 @@ export function MantraLibraryModal({
                           <Pressable
                             style={styles.deleteButton}
                             onPress={() => handleDeleteCustom(mantra)}
-                            hitSlop={8}
+                            hitSlop={10}
                           >
                             <Text style={styles.deleteButtonText}>✕</Text>
                           </Pressable>
                         ) : null}
-                      </View>
-                    </View>
-
-                    {/* Mantra Sacred Text in Preferred Script */}
-                    {displayText ? (
-                      <View style={styles.scriptTextContainer}>
-                        <Text style={styles.scriptText} numberOfLines={3}>
-                          {displayText}
-                        </Text>
-                      </View>
-                    ) : null}
-
-                    {/* Footer: Target Chip + Practice History Stats */}
-                    <View style={styles.mantraFooter}>
-                      <View style={styles.targetBadge}>
-                        <Text style={styles.targetBadgeText}>
-                          {mantra.defaultTarget} {t.japa.mantraStatsReps}
-                        </Text>
-                      </View>
-
-                      {stats ? (
-                        <View style={styles.statsBadge}>
-                          <Text style={styles.statsBadgeText}>
-                            {stats.sessionsCount} {t.japa.mantraStatsSessions} ·{' '}
-                            {stats.totalRepetitions} {t.japa.mantraStatsReps}
-                          </Text>
-                        </View>
-                      ) : null}
-
-                      <View style={styles.selectHint}>
-                        <Text style={styles.selectHintText}>
-                          {t.japa.selectMantra} →
-                        </Text>
                       </View>
                     </View>
                   </Pressable>
@@ -676,6 +637,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: colors.border,
   },
+  tabInlineWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
   filterTabSelected: {
     backgroundColor: colors.earth,
     borderColor: colors.gold,
@@ -711,8 +677,8 @@ const styles = StyleSheet.create({
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderWidth: 1,
-    borderRadius: 16,
-    padding: 16,
+    borderRadius: 12,
+    padding: 10,
   },
   mantraCardFavorite: {
     borderColor: colors.goldSoft,
@@ -720,129 +686,92 @@ const styles = StyleSheet.create({
   mantraCardPressed: {
     backgroundColor: colors.surfaceAlt,
   },
-  mantraCardHeader: {
+  mantraCardRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
+    gap: 10,
   },
-  mantraTitleBlock: {
+  cardDeityAvatar: {
+    width: 42,
+    height: 42,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.gold,
+  },
+  cardAvatarFallback: {
+    width: 42,
+    height: 42,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surfaceAlt,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  mantraMainInfo: {
     flex: 1,
-    marginRight: 8,
   },
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    flexWrap: 'wrap',
     gap: 6,
   },
   mantraName: {
     color: colors.textPrimary,
-    fontSize: 17,
-    fontWeight: '700',
-  },
-  ashtothramBadge: {
-    backgroundColor: '#0F261E',
-    borderColor: colors.gold,
-    borderWidth: 1,
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-  },
-  ashtothramBadgeText: {
-    color: colors.gold,
-    fontSize: 10,
+    fontSize: 15,
     fontWeight: '700',
   },
   customBadge: {
     backgroundColor: colors.earth,
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    borderRadius: 4,
+    paddingHorizontal: 5,
+    paddingVertical: 1,
   },
   customBadgeText: {
     color: colors.goldSoft,
-    fontSize: 10,
+    fontSize: 9,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-  mantraDeity: {
+  scriptPreviewText: {
     color: colors.goldSoft,
     fontSize: 12,
-    fontWeight: '600',
+    marginTop: 2,
+    opacity: 0.9,
+  },
+  deitySubText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 2,
+  },
+  compactStatsText: {
+    color: colors.textMuted,
+    fontSize: 11,
     marginTop: 2,
   },
   cardActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 4,
   },
   favoriteButton: {
-    padding: 4,
+    padding: 6,
   },
   favoriteStar: {
     color: colors.textMuted,
-    fontSize: 22,
+    fontSize: 20,
     fontWeight: '700',
   },
   favoriteStarActive: {
     color: colors.gold,
   },
   deleteButton: {
-    padding: 4,
+    padding: 6,
   },
   deleteButtonText: {
     color: colors.textMuted,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '700',
-  },
-  scriptTextContainer: {
-    marginTop: 10,
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderLeftWidth: 3,
-    borderLeftColor: colors.gold,
-  },
-  scriptText: {
-    color: colors.ivoryWarm,
-    fontSize: 14,
-    lineHeight: 20,
-    fontStyle: 'italic',
-  },
-  mantraFooter: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 12,
-    gap: 8,
-    flexWrap: 'wrap',
-  },
-  targetBadge: {
-    backgroundColor: colors.earth,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-  },
-  targetBadgeText: {
-    color: colors.goldSoft,
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  statsBadge: {
-    backgroundColor: colors.surfaceAlt,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  statsBadgeText: {
-    color: colors.textSecondary,
-    fontSize: 11,
-    fontWeight: '600',
-  },
-  selectHint: {
-    marginLeft: 'auto',
   },
   selectHintText: {
     color: colors.goldSoft,

@@ -1,5 +1,6 @@
 import React from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { colors } from '../theme/colors';
 
 interface HamburgerMenuButtonProps {
@@ -22,37 +23,32 @@ export function HamburgerMenuButton({
       accessibilityLabel={accessibilityLabel}
       hitSlop={10}
     >
-      <View style={styles.bar} />
-      <View style={[styles.bar, styles.barMiddle]} />
-      <View style={styles.bar} />
+      <Svg width={20} height={20} viewBox="0 0 24 24" fill="none">
+        <Path
+          d="M4 6h16M4 12h16M4 18h16"
+          stroke={colors.goldSoft}
+          strokeWidth={2.2}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </Svg>
     </Pressable>
   );
 }
 
 const styles = StyleSheet.create({
   button: {
-    padding: 8,
+    width: 36,
+    height: 36,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: 10,
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderWidth: 1,
-    marginRight: 12,
   },
   buttonPressed: {
     backgroundColor: colors.surfaceAlt,
     borderColor: colors.goldSoft,
-  },
-  bar: {
-    width: 18,
-    height: 2,
-    backgroundColor: colors.goldSoft,
-    borderRadius: 1,
-  },
-  barMiddle: {
-    marginVertical: 4,
-    width: 14,
-    alignSelf: 'flex-start',
   },
 });

@@ -93,24 +93,6 @@ export function SettingsScreen() {
           <Pressable
             style={[
               styles.langButton,
-              language === 'en' && styles.langButtonSelected,
-            ]}
-            onPress={() => handleLanguageChange('en')}
-            accessibilityRole="button"
-          >
-            <Text
-              style={[
-                styles.langText,
-                language === 'en' && styles.langTextSelected,
-              ]}
-            >
-              English
-            </Text>
-          </Pressable>
-
-          <Pressable
-            style={[
-              styles.langButton,
               language === 'te' && styles.langButtonSelected,
             ]}
             onPress={() => handleLanguageChange('te')}
@@ -123,6 +105,24 @@ export function SettingsScreen() {
               ]}
             >
               తెలుగు (Telugu)
+            </Text>
+          </Pressable>
+
+          <Pressable
+            style={[
+              styles.langButton,
+              language === 'en' && styles.langButtonSelected,
+            ]}
+            onPress={() => handleLanguageChange('en')}
+            accessibilityRole="button"
+          >
+            <Text
+              style={[
+                styles.langText,
+                language === 'en' && styles.langTextSelected,
+              ]}
+            >
+              English
             </Text>
           </Pressable>
         </View>

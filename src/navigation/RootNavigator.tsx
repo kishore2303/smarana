@@ -1,4 +1,5 @@
 import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 import {
   NavigationContainer,
   useNavigationContainerRef,
@@ -10,8 +11,10 @@ import { AshtothramModal } from '../components/AshtothramModal';
 import { HamburgerMenuButton } from '../components/HamburgerMenuButton';
 import { HeaderBackButton } from '../components/HeaderBackButton';
 import { MantraLibraryModal } from '../components/MantraLibraryModal';
-import { SmaranaHeaderTitle } from '../components/SmaranaHeaderTitle';
+import { PanchangamModal } from '../components/PanchangamModal';
+import { SmaranaLogo } from '../components/SmaranaLogo';
 import { TabIcon } from '../components/TabIcon';
+import { TopLanguageToggle } from '../components/TopLanguageToggle';
 import { MenuProvider, useAppMenu } from './MenuContext';
 import { getTabBarStyle } from './tabBarStyle';
 import { RootTabParamList } from './types';
@@ -41,6 +44,9 @@ function InnerNavigator() {
     isMantraLibraryOpen,
     openMantraLibrary,
     closeMantraLibrary,
+    isPanchangamOpen,
+    openPanchangam,
+    closePanchangam,
     startJapaWithAshtothram,
   } = useAppMenu();
 
@@ -63,27 +69,37 @@ function InnerNavigator() {
             borderBottomWidth: 1,
           },
           headerTintColor: colors.textPrimary,
-          headerTitleAlign: 'center',
-          headerTitle: () => (
-            <SmaranaHeaderTitle
-              title={tabTitles[route.name]}
-              isBrand={route.name === 'Home'}
-            />
-          ),
+          headerTitleAlign: 'left',
+          headerTitle:
+            route.name === 'Home'
+              ? () => null
+              : () => (
+                  <Text style={styles.headerTitleText} numberOfLines={1}>
+                    {tabTitles[route.name]}
+                  </Text>
+                ),
           headerLeft:
-            route.name !== 'Home'
+            route.name === 'Home'
               ? () => (
+                  <View style={styles.headerBrandContainer}>
+                    <SmaranaLogo variant="symbol" size={24} />
+                    <Text style={styles.headerBrandText}>SMARANA</Text>
+                  </View>
+                )
+              : () => (
                   <HeaderBackButton
                     onPress={() => navigation.navigate('Home')}
                     accessibilityLabel={t.common.backHome}
                   />
-                )
-              : undefined,
+                ),
           headerRight: () => (
-            <HamburgerMenuButton
-              onPress={openMenu}
-              accessibilityLabel={t.menu.menuTitle}
-            />
+            <View style={styles.headerRightContainer}>
+              <TopLanguageToggle />
+              <HamburgerMenuButton
+                onPress={openMenu}
+                accessibilityLabel={t.menu.menuTitle}
+              />
+            </View>
           ),
           tabBarStyle: defaultTabBarStyle,
           tabBarActiveTintColor: colors.goldSoft,
@@ -131,9 +147,16 @@ function InnerNavigator() {
         onClose={closeMenu}
         onOpenAshtothram={openAshtothram}
         onOpenMantraLibrary={openMantraLibrary}
+        onOpenPanchangam={openPanchangam}
         onNavigateTab={(tab) => {
           navigationRef.navigate(tab);
         }}
+      />
+
+      {/* Global Panchangam Modal */}
+      <PanchangamModal
+        visible={isPanchangamOpen}
+        onClose={closePanchangam}
       />
 
       {/* Global Ashtothram Modal */}
@@ -168,3 +191,29 @@ export function RootNavigator() {
     </MenuProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  headerBrandContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginLeft: 16,
+    gap: 8,
+  },
+  headerBrandText: {
+    color: colors.textPrimary,
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 2.5,
+  },
+  headerTitleText: {
+    color: colors.textPrimary,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+  headerRightContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingRight: 16,
+  },
+});

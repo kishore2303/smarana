@@ -28,6 +28,11 @@ export interface TranslationStrings {
     japaBadge: string;
     japaTitle: string;
     japaDesc: string;
+    todaySadhana: string;
+    noSadhanaToday: string;
+    startPractice: string;
+    japaSubtitle: string;
+    pradakshinaSubtitle: string;
   };
   pradakshina: {
     eyebrow: string;
@@ -176,6 +181,8 @@ export interface TranslationStrings {
     pradakshinaDesc: string;
     mantraLibraryTitle: string;
     mantraLibraryDesc: string;
+    panchangamTitle: string;
+    panchangamDesc: string;
     historyTitle: string;
     historyDesc: string;
     settingsTitle: string;
@@ -198,6 +205,67 @@ export interface TranslationStrings {
     cardHomeBadge: string;
     cardHomeTitle: string;
     cardHomeDesc: string;
+    fontSizeRegular: string;
+    fontSizeLarge: string;
+    fontSizeXLarge: string;
+    tapToHighlight: string;
+  };
+  panchangam: {
+    title: string;
+    subtitle: string;
+    today: string;
+    yesterday: string;
+    tomorrow: string;
+    samvatsara: string;
+    ayana: string;
+    ritu: string;
+    masa: string;
+    paksha: string;
+    tithi: string;
+    nakshatra: string;
+    yoga: string;
+    karana: string;
+    vaara: string;
+    timingsSection: string;
+    auspiciousTimings: string;
+    inauspiciousTimings: string;
+    rahuKalam: string;
+    yamagandam: string;
+    gulikaKalam: string;
+    durmuhurtham: string;
+    abhijit: string;
+    specialDay: string;
+    close: string;
+    quickHomeHint: string;
+    panchangamTab: string;
+    sankalpamTab: string;
+    datePickerTitle: string;
+    selectDate: string;
+    jumpToUgadi: string;
+    jumpToToday: string;
+    jumpToEndYear: string;
+    ugadiToUgadiRange: string;
+    tradition: string;
+    smartha: string;
+    vaishnava: string;
+    purpose: string;
+    poojaPurpose: string;
+    pratahSandhya: string;
+    madhyahnikaSandhya: string;
+    sayamSandhya: string;
+    gayatriJapa: string;
+    japaPurpose: string;
+    gotramLabel: string;
+    nameLabel: string;
+    includeFamilyLabel: string;
+    copySankalpam: string;
+    copiedSankalpam: string;
+    bhavarthaTitle: string;
+    scriptToggleTe: string;
+    scriptToggleEn: string;
+    personalDetails: string;
+    personalDetailsHint: string;
+    calendarButton: string;
   };
   notifications: {
     pradakshinaTitle: string;
@@ -238,6 +306,11 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       japaTitle: 'Japa',
       japaDesc:
         'Count down from 108 or custom targets (11, 27, 54, 1008) with calm haptics.',
+      todaySadhana: "Today's Sadhana",
+      noSadhanaToday: "Ready to begin today's practice",
+      startPractice: 'Start',
+      japaSubtitle: 'Mala Counter · 108 Beads',
+      pradakshinaSubtitle: 'Temple Circumambulation',
     },
     pradakshina: {
       eyebrow: 'TEMPLE CIRCUMAMBULATION',
@@ -396,21 +469,23 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
     },
     menu: {
       menuTitle: 'Smarana Menu',
-      ashtothramTitle: 'Ashtothram (108 Names)',
-      ashtothramDesc: 'Recite and count 108 sacred names for Archana & Japa',
+      ashtothramTitle: 'Ashtothram',
+      ashtothramDesc: '108 sacred names for Archana & Japa',
       japaTitle: 'Japa Counter',
-      japaDesc: 'Mantra counting with 108 Mala ring & haptics',
+      japaDesc: 'Count with 108 Mala ring & haptics',
       pradakshinaTitle: 'Pradakshina Counter',
       pradakshinaDesc: 'Temple circumambulation counter',
       mantraLibraryTitle: 'Mantra Library',
-      mantraLibraryDesc: 'Browse popular and custom sacred mantras',
+      mantraLibraryDesc: 'Browse and save sacred mantras',
+      panchangamTitle: 'Panchangam',
+      panchangamDesc: 'Telugu Daily Panchangam & Timings',
       historyTitle: 'Practice History',
-      historyDesc: 'Review daily and lifetime Sadhana sessions',
+      historyDesc: 'View daily and total Sadhana',
       settingsTitle: 'Settings & Calibration',
-      settingsDesc: 'Mala size, back-tap sensitivity, language & awake mode',
+      settingsDesc: 'Mala size, back-tap, and haptics',
       aboutTitle: 'About Smarana',
       aboutDesc:
-        'Offline-first, privacy-first companion for Japa, Pradakshina and daily Sadhana. No accounts, no data tracking.',
+        'Offline-first, privacy-first companion for Japa, Pradakshina and daily Sadhana.',
     },
     ashtothram: {
       badge: '108 DIVINE NAMES',
@@ -429,6 +504,67 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       cardHomeTitle: 'Ashtothram',
       cardHomeDesc:
         'Recite and count 108 names for Ganesha, Shiva, Venkateswara, Lakshmi, Hanuman, and more with Devanagari, Telugu, and English.',
+      fontSizeRegular: 'Standard',
+      fontSizeLarge: 'Large',
+      fontSizeXLarge: 'Extra Large',
+      tapToHighlight: 'Tap any name to bookmark chant',
+    },
+    panchangam: {
+      title: 'Telugu Panchangam',
+      subtitle: 'Daily Drik Ganitha Panchangam for Andhra Pradesh & Telangana',
+      today: 'Today',
+      yesterday: 'Yesterday',
+      tomorrow: 'Tomorrow',
+      samvatsara: 'Samvatsaram',
+      ayana: 'Ayanam',
+      ritu: 'Rithuvu',
+      masa: 'Masam',
+      paksha: 'Paksham',
+      tithi: 'Thithi',
+      nakshatra: 'Nakshatram',
+      yoga: 'Yogam',
+      karana: 'Karanam',
+      vaara: 'Vaaram',
+      timingsSection: 'Daily Timings',
+      auspiciousTimings: 'Auspicious Timings',
+      inauspiciousTimings: 'Inauspicious Timings',
+      rahuKalam: 'Rahu Kalam',
+      yamagandam: 'Yamagandam',
+      gulikaKalam: 'Gulika Kalam',
+      durmuhurtham: 'Durmuhurtham',
+      abhijit: 'Abhijit Muhurtham',
+      specialDay: 'Sacred Vratam / Day',
+      close: 'Close',
+      quickHomeHint: 'Today’s Panchangam',
+      panchangamTab: 'Panchangam',
+      sankalpamTab: 'Sankalpam',
+      datePickerTitle: 'Telugu Year (Ugadi to Ugadi)',
+      selectDate: 'Select Date',
+      jumpToUgadi: 'Ugadi',
+      jumpToToday: 'Today',
+      jumpToEndYear: 'Year End',
+      ugadiToUgadiRange: 'Ugadi to Ugadi Cycle',
+      tradition: 'Tradition',
+      smartha: 'Smartha (Parameshwara)',
+      vaishnava: 'Vaishnava (Narayana)',
+      purpose: 'Sankalpa Purpose',
+      poojaPurpose: 'Nitya Devatarchana / Pooja',
+      pratahSandhya: 'Pratah Sandhyavandanam',
+      madhyahnikaSandhya: 'Madhyahnika Sandhya',
+      sayamSandhya: 'Sayam Sandhyavandanam',
+      gayatriJapa: 'Gayatri Mahamantra Japa',
+      japaPurpose: 'Ishta Devata Japa',
+      gotramLabel: 'Gotram (optional)',
+      nameLabel: 'Name (optional)',
+      includeFamilyLabel: 'Include Family (Sahakutumbasya)',
+      copySankalpam: 'Share / Copy Sankalpam',
+      copiedSankalpam: 'Sankalpam Copied!',
+      bhavarthaTitle: 'Sacred Meaning (Bhavartha)',
+      scriptToggleTe: 'తెలుగు లిపి',
+      scriptToggleEn: 'English (IAST)',
+      personalDetails: 'Personal Gotram & Name',
+      personalDetailsHint: 'Customize Sankalpam with your Gotra and Sharma',
+      calendarButton: 'Ugadi Calendar',
     },
     notifications: {
       pradakshinaTitle: 'Pradakshina Complete',
@@ -467,6 +603,11 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       japaTitle: 'జపం',
       japaDesc:
         '108 లేదా 11, 27, 54, 1008 లక్ష్యాలతో ప్రశాంతంగా జపం లెక్కించండి.',
+      todaySadhana: 'ఈ రోజు సాధన',
+      noSadhanaToday: 'నేటి సాధనను ప్రారంభించండి',
+      startPractice: 'ప్రారంభించు',
+      japaSubtitle: 'మాల జపం · 108 నామాలు',
+      pradakshinaSubtitle: 'ఆలయ ప్రదక్షిణలు',
     },
     pradakshina: {
       eyebrow: 'ఆలయ ప్రదక్షిణలు',
@@ -625,21 +766,23 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
     },
     menu: {
       menuTitle: 'స్మరణ మెనూ',
-      ashtothramTitle: 'అష్టోత్తర శతనామావళి (108)',
-      ashtothramDesc: 'అర్చన మరియు జపం కొరకు 108 దివ్య నామాలు',
+      ashtothramTitle: 'అష్టోత్తర శతనామావళి',
+      ashtothramDesc: 'అర్చన మరియు జపానికి 108 నామాలు',
       japaTitle: 'జప కౌంటర్',
-      japaDesc: '108 పూసల మాల మరియు ప్రశాంతమైన హ్యాప్టిక్స్',
+      japaDesc: '108 మాల పూసలతో జప సాధన',
       pradakshinaTitle: 'ప్రదక్షిణ కౌంటర్',
-      pradakshinaDesc: 'ఆలయ ప్రదక్షిణలను సులభంగా ట్రాక్ చేయండి',
+      pradakshinaDesc: 'ఆలయ ప్రదక్షిణల లెక్కింపు',
       mantraLibraryTitle: 'మంత్ర గ్రంథాలయం',
-      mantraLibraryDesc: 'ప్రసిద్ధ మరియు సొంత మంత్రాల సంగ్రహం',
+      mantraLibraryDesc: 'పవిత్ర మంత్రాల సంగ్రహం',
+      panchangamTitle: 'తెలుగు పంచాంగం',
+      panchangamDesc: 'దిన పంచాంగం, తిథి & రాహుకాలం',
       historyTitle: 'సాధన చరిత్ర',
-      historyDesc: 'ఈరోజు మరియు మొత్తం సాధన వివరాలు',
+      historyDesc: 'రోజువారీ సాధన వివరాలు',
       settingsTitle: 'సెట్టింగ్స్ & కాలిబ్రేషన్',
-      settingsDesc: 'మాల సైజు, బ్యాక్-ట్యాప్ సున్నితత్వం, భాష',
+      settingsDesc: 'మాల సైజు, బ్యాక్-ట్యాప్ సెట్టింగ్స్',
       aboutTitle: 'స్మరణ గురించి',
       aboutDesc:
-        'జపం, ప్రదక్షిణ మరియు నిత్య సాధనకు ఆఫ్‌లైన్, గోప్యమైన సాధన సహచరి. ఇంటర్నెట్ లేదా ఖాతాలు అవసరం లేదు.',
+        'జపం, ప్రదక్షిణ మరియు నిత్య సాధనకు ఆఫ్‌లైన్, గోప్యమైన సాధన సహచరి.',
     },
     ashtothram: {
       badge: '108 దివ్య నామాలు',
@@ -658,6 +801,67 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       cardHomeTitle: 'అష్టోత్తర శతనామావళి',
       cardHomeDesc:
         'గణేశుడు, శివుడు, వేంకటేశ్వరుడు, లక్ష్మి, హనుమాన్ తదితర దేవతల 108 నామాలను సంస్కృతం, తెలుగు మరియు ఆంగ్లంలో పఠించండి.',
+      fontSizeRegular: 'సాధారణం',
+      fontSizeLarge: 'పెద్దది',
+      fontSizeXLarge: 'మరింత పెద్దది',
+      tapToHighlight: 'జప స్థానాన్ని గుర్తించడానికి నామంపై తాకండి',
+    },
+    panchangam: {
+      title: 'తెలుగు పంచాంగం',
+      subtitle: 'ఆంధ్రప్రదేశ్ & తెలంగాణ దిన దృక్సిద్ధాంత పంచాంగం',
+      today: 'నేడు',
+      yesterday: 'నిన్న',
+      tomorrow: 'రేపు',
+      samvatsara: 'సంవత్సరం',
+      ayana: 'ఆయనం',
+      ritu: 'ఋతువు',
+      masa: 'మాసం',
+      paksha: 'పక్షం',
+      tithi: 'తిథి',
+      nakshatra: 'నక్షత్రం',
+      yoga: 'యోగం',
+      karana: 'కరణం',
+      vaara: 'వారం',
+      timingsSection: 'దిన సమయాలు',
+      auspiciousTimings: 'శుభ సమయాలు',
+      inauspiciousTimings: 'అశుభ సమయాలు',
+      rahuKalam: 'రాహుకాలం',
+      yamagandam: 'యమగండం',
+      gulikaKalam: 'గుళిక కాలం',
+      durmuhurtham: 'దుర్ముహూర్తం',
+      abhijit: 'అభిజిత్ ముహూర్తం',
+      specialDay: 'విశేష పర్వదినం / వ్రతం',
+      close: 'మూసివేయి',
+      quickHomeHint: 'నేటి పంచాంగం',
+      panchangamTab: 'పంచాంగం',
+      sankalpamTab: 'సంకల్పం',
+      datePickerTitle: 'తెలుగు సంవత్సరం (ఉగాది నుండి ఉగాది)',
+      selectDate: 'తేదీ ఎంపిక చేయండి',
+      jumpToUgadi: 'ఉగాది ప్రారంభం',
+      jumpToToday: 'నేడు',
+      jumpToEndYear: 'సంవత్సరాంతం',
+      ugadiToUgadiRange: 'ఉగాది నుండి ఉగాది వరకు',
+      tradition: 'సంప్రదాయం',
+      smartha: 'స్మార్త (శ్రీపరమేశ్వర ప్రీత్యర్థం)',
+      vaishnava: 'వైష్ణవ (శ్రీమన్నారాయణ ప్రీత్యర్థం)',
+      purpose: 'సంకల్ప ప్రయోజనం',
+      poojaPurpose: 'నిత్య పూజ / దేవతార్చన',
+      pratahSandhya: 'ప్రాతః సంధ్యావందనం',
+      madhyahnikaSandhya: 'మాధ్యాహ్నిక సంధ్యావందనం',
+      sayamSandhya: 'సాయం సంధ్యావందనం',
+      gayatriJapa: 'గాయత్రీ మహామంత్ర జపం',
+      japaPurpose: 'ఇష్టదేవతా జప సాధన',
+      gotramLabel: 'గోత్రం (ఐచ్ఛికం)',
+      nameLabel: 'పేరు (శర్మ / వర్మ / నామధేయం)',
+      includeFamilyLabel: 'కుటుంబ సభ్యులతో (సహకుటుంబస్య)',
+      copySankalpam: 'సంకల్పం షేర్ / కాపీ చేయి',
+      copiedSankalpam: 'సంకల్పం కాపీ చేయబడింది!',
+      bhavarthaTitle: 'సంకల్ప అర్థం (భావార్థం)',
+      scriptToggleTe: 'తెలుగు లిపి',
+      scriptToggleEn: 'English (IAST)',
+      personalDetails: 'గోత్ర నామాలు (ఐచ్ఛికం)',
+      personalDetailsHint: 'మీ గోత్రం మరియు పేరుతో సంకల్పాన్ని తయారుచేయండి',
+      calendarButton: 'ఉగాది క్యాలెండర్',
     },
     notifications: {
       pradakshinaTitle: 'ప్రదక్షిణ పూర్తయింది',

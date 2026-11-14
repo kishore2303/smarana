@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SmaranaLogo } from './SmaranaLogo';
+import { TabIcon } from './TabIcon';
 import { useLanguage } from '../i18n/LanguageContext';
 import { colors } from '../theme/colors';
 
@@ -17,6 +18,7 @@ interface AppMenuModalProps {
   onClose: () => void;
   onOpenAshtothram: () => void;
   onOpenMantraLibrary: () => void;
+  onOpenPanchangam: () => void;
   onNavigateTab: (tabName: 'Home' | 'Japa' | 'Pradakshina' | 'History' | 'Settings') => void;
 }
 
@@ -25,6 +27,7 @@ export function AppMenuModal({
   onClose,
   onOpenAshtothram,
   onOpenMantraLibrary,
+  onOpenPanchangam,
   onNavigateTab,
 }: AppMenuModalProps) {
   const insets = useSafeAreaInsets();
@@ -47,6 +50,11 @@ export function AppMenuModal({
     onOpenMantraLibrary();
   };
 
+  const handleSelectPanchangam = () => {
+    onClose();
+    onOpenPanchangam();
+  };
+
   return (
     <Modal
       visible={visible}
@@ -55,24 +63,33 @@ export function AppMenuModal({
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <Pressable style={styles.backdrop} onPress={onClose} />
+        <Pressable
+          style={styles.backdrop}
+          onPress={onClose}
+          accessibilityRole="button"
+          accessibilityLabel={t.common.cancel}
+        />
 
         <View
           style={[
             styles.menuSheet,
             {
-              paddingTop: Math.max(insets.top, 20) + 10,
-              paddingBottom: Math.max(insets.bottom, 20) + 10,
+              paddingTop: Math.max(insets.top, 20) + 12,
             },
           ]}
         >
-          {/* Menu Header with Lotus & Brand */}
+          {/* Menu Header with Single Clean Lotus & Brand Block */}
           <View style={styles.menuHeader}>
             <View style={styles.brandRow}>
-              <SmaranaLogo variant="primary" size={38} showSanskrit />
+              <SmaranaLogo variant="symbol" size={42} />
               <View style={styles.brandTextBlock}>
-                <Text style={styles.brandTitle}>SMARANA</Text>
-                <Text style={styles.brandTagline}>{t.home.eyebrow}</Text>
+                <View style={styles.brandTitleRow}>
+                  <Text style={styles.brandTitle}>SMARANA</Text>
+                  <Text style={styles.brandSanskrit}>स्मरण</Text>
+                </View>
+                <Text style={styles.brandTagline} numberOfLines={1}>
+                  {t.home.eyebrow}
+                </Text>
               </View>
             </View>
 
@@ -81,7 +98,7 @@ export function AppMenuModal({
               onPress={onClose}
               accessibilityRole="button"
               accessibilityLabel={t.common.cancel}
-              hitSlop={8}
+              hitSlop={10}
             >
               <Text style={styles.closeButtonText}>✕</Text>
             </Pressable>
@@ -89,7 +106,10 @@ export function AppMenuModal({
 
           <ScrollView
             style={styles.scroll}
-            contentContainerStyle={styles.scrollContent}
+            contentContainerStyle={[
+              styles.scrollContent,
+              { paddingBottom: Math.max(insets.bottom, 24) + 40 },
+            ]}
             showsVerticalScrollIndicator={false}
           >
             {/* FEATURED: Ashtothram Card */}
@@ -99,13 +119,20 @@ export function AppMenuModal({
                 pressed && styles.cardPressed,
               ]}
               onPress={handleSelectAshtothram}
+              accessibilityRole="button"
             >
               <View style={styles.itemTopRow}>
                 <Text style={styles.itemBadge}>108 DIVINE NAMES</Text>
-                <Text style={styles.itemIcon}>🌸</Text>
+                <TabIcon name="Ashtothram" color={colors.goldSoft} size={20} />
               </View>
               <Text style={styles.featuredTitle}>{t.menu.ashtothramTitle}</Text>
-              <Text style={styles.featuredDesc}>{t.menu.ashtothramDesc}</Text>
+              <Text
+                style={styles.featuredDesc}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {t.menu.ashtothramDesc}
+              </Text>
             </Pressable>
 
             {/* Standard Nav Items */}
@@ -117,11 +144,18 @@ export function AppMenuModal({
                   pressed && styles.cardPressed,
                 ]}
                 onPress={() => handleSelectTab('Japa')}
+                accessibilityRole="button"
               >
-                <Text style={styles.navItemIcon}>📿</Text>
+                <TabIcon name="Japa" color={colors.goldSoft} size={20} />
                 <View style={styles.navItemText}>
                   <Text style={styles.navItemTitle}>{t.menu.japaTitle}</Text>
-                  <Text style={styles.navItemDesc}>{t.menu.japaDesc}</Text>
+                  <Text
+                    style={styles.navItemDesc}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {t.menu.japaDesc}
+                  </Text>
                 </View>
                 <Text style={styles.chevron}>›</Text>
               </Pressable>
@@ -133,13 +167,18 @@ export function AppMenuModal({
                   pressed && styles.cardPressed,
                 ]}
                 onPress={() => handleSelectTab('Pradakshina')}
+                accessibilityRole="button"
               >
-                <Text style={styles.navItemIcon}>🛕</Text>
+                <TabIcon name="Pradakshina" color={colors.goldSoft} size={20} />
                 <View style={styles.navItemText}>
                   <Text style={styles.navItemTitle}>
                     {t.menu.pradakshinaTitle}
                   </Text>
-                  <Text style={styles.navItemDesc}>
+                  <Text
+                    style={styles.navItemDesc}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
                     {t.menu.pradakshinaDesc}
                   </Text>
                 </View>
@@ -153,14 +192,44 @@ export function AppMenuModal({
                   pressed && styles.cardPressed,
                 ]}
                 onPress={handleSelectMantraLibrary}
+                accessibilityRole="button"
               >
-                <Text style={styles.navItemIcon}>📖</Text>
+                <TabIcon name="MantraLibrary" color={colors.goldSoft} size={20} />
                 <View style={styles.navItemText}>
                   <Text style={styles.navItemTitle}>
                     {t.menu.mantraLibraryTitle}
                   </Text>
-                  <Text style={styles.navItemDesc}>
+                  <Text
+                    style={styles.navItemDesc}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
                     {t.menu.mantraLibraryDesc}
+                  </Text>
+                </View>
+                <Text style={styles.chevron}>›</Text>
+              </Pressable>
+
+              {/* Telugu Panchangam */}
+              <Pressable
+                style={({ pressed }) => [
+                  styles.navItem,
+                  pressed && styles.cardPressed,
+                ]}
+                onPress={handleSelectPanchangam}
+                accessibilityRole="button"
+              >
+                <TabIcon name="Panchangam" color={colors.goldSoft} size={20} />
+                <View style={styles.navItemText}>
+                  <Text style={styles.navItemTitle}>
+                    {t.menu.panchangamTitle}
+                  </Text>
+                  <Text
+                    style={styles.navItemDesc}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {t.menu.panchangamDesc}
                   </Text>
                 </View>
                 <Text style={styles.chevron}>›</Text>
@@ -173,11 +242,18 @@ export function AppMenuModal({
                   pressed && styles.cardPressed,
                 ]}
                 onPress={() => handleSelectTab('History')}
+                accessibilityRole="button"
               >
-                <Text style={styles.navItemIcon}>📊</Text>
+                <TabIcon name="History" color={colors.goldSoft} size={20} />
                 <View style={styles.navItemText}>
                   <Text style={styles.navItemTitle}>{t.menu.historyTitle}</Text>
-                  <Text style={styles.navItemDesc}>{t.menu.historyDesc}</Text>
+                  <Text
+                    style={styles.navItemDesc}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
+                    {t.menu.historyDesc}
+                  </Text>
                 </View>
                 <Text style={styles.chevron}>›</Text>
               </Pressable>
@@ -186,16 +262,22 @@ export function AppMenuModal({
               <Pressable
                 style={({ pressed }) => [
                   styles.navItem,
+                  styles.navItemLast,
                   pressed && styles.cardPressed,
                 ]}
                 onPress={() => handleSelectTab('Settings')}
+                accessibilityRole="button"
               >
-                <Text style={styles.navItemIcon}>⚙️</Text>
+                <TabIcon name="Settings" color={colors.goldSoft} size={20} />
                 <View style={styles.navItemText}>
                   <Text style={styles.navItemTitle}>
                     {t.menu.settingsTitle}
                   </Text>
-                  <Text style={styles.navItemDesc}>
+                  <Text
+                    style={styles.navItemDesc}
+                    numberOfLines={1}
+                    ellipsizeMode="tail"
+                  >
                     {t.menu.settingsDesc}
                   </Text>
                 </View>
@@ -221,57 +303,70 @@ export function AppMenuModal({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.65)',
+    backgroundColor: 'rgba(0, 0, 0, 0.88)',
     flexDirection: 'row',
   },
   backdrop: {
     flex: 1,
   },
   menuSheet: {
-    width: '84%',
+    width: '85%',
     maxWidth: 360,
     backgroundColor: colors.background,
     borderLeftWidth: 1,
     borderLeftColor: colors.border,
     paddingHorizontal: 20,
-    justifyContent: 'space-between',
   },
   menuHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
   },
   brandRow: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
+    marginRight: 10,
   },
   brandTextBlock: {
+    flex: 1,
     justifyContent: 'center',
+  },
+  brandTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 8,
   },
   brandTitle: {
     color: colors.textPrimary,
-    fontSize: 16,
+    fontSize: 17,
     fontWeight: '700',
     letterSpacing: 1.2,
   },
-  brandTagline: {
+  brandSanskrit: {
     color: colors.goldSoft,
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: '600',
+  },
+  brandTagline: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 2,
   },
   closeButton: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 18,
-    width: 32,
-    height: 32,
+    width: 34,
+    height: 34,
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 4,
   },
   closeButtonText: {
     color: colors.textSecondary,
@@ -283,8 +378,7 @@ const styles = StyleSheet.create({
     marginTop: 14,
   },
   scrollContent: {
-    paddingBottom: 20,
-    gap: 14,
+    paddingTop: 4,
   },
   featuredCard: {
     backgroundColor: colors.surface,
@@ -292,6 +386,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderRadius: 16,
     padding: 14,
+    marginBottom: 18, // Breathing room between Ashtothram card and menu list
   },
   cardPressed: {
     backgroundColor: colors.surfaceAlt,
@@ -309,14 +404,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1,
   },
-  itemIcon: {
-    fontSize: 18,
-  },
   featuredTitle: {
     color: colors.textPrimary,
-    fontSize: 17,
+    fontSize: 16,
     fontWeight: '700',
-    marginBottom: 4,
+    marginBottom: 3,
   },
   featuredDesc: {
     color: colors.textSecondary,
@@ -329,18 +421,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 16,
     overflow: 'hidden',
+    marginBottom: 16,
   },
   navItem: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
-    paddingVertical: 12,
+    paddingVertical: 13,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     gap: 12,
   },
-  navItemIcon: {
-    fontSize: 20,
+  navItemLast: {
+    borderBottomWidth: 0,
   },
   navItemText: {
     flex: 1,
@@ -366,8 +459,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 12,
-    padding: 12,
-    marginTop: 6,
+    padding: 14,
   },
   aboutTitle: {
     color: colors.goldSoft,
@@ -379,7 +471,7 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 12,
     lineHeight: 17,
-    marginBottom: 6,
+    marginBottom: 8,
   },
   aboutMeta: {
     color: colors.textMuted,

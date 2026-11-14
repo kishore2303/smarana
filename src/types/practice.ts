@@ -101,7 +101,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   backTapEnabled: true,
   backTapSensitivity: 'medium',
   keepScreenAwake: true,
-  language: 'en',
+  language: 'te',
   malaSize: 108,
   meruBehavior: 'continue',
   malaHapticEnabled: true,

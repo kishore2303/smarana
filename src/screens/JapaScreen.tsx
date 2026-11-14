@@ -12,7 +12,9 @@ import {
 } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 import { CountdownCounter } from '../components/CountdownCounter';
+import { FontSizeControl, ReadingFontSize } from '../components/FontSizeControl';
 import { MantraLibraryModal } from '../components/MantraLibraryModal';
+import { TabIcon } from '../components/TabIcon';
 import {
   deletePreset,
   getAllMantras,
@@ -40,22 +42,23 @@ export function JapaScreen() {
   const [presets, setPresets] = useState<SavedPreset[]>([]);
   const [allMantras, setAllMantras] = useState<MantraEntry[]>([]);
   const [selectedMantra, setSelectedMantra] = useState<MantraEntry | null>(null);
-  const [preferredScript, setPreferredScript] = useState<MantraScript>(
-    language === 'te' ? 'telugu' : 'sanskrit'
-  );
+  const preferredScript: MantraScript = language === 'te' ? 'telugu' : 'english';
   const [isLibraryOpen, setIsLibraryOpen] = useState(false);
   const [isMantraTextExpanded, setIsMantraTextExpanded] = useState(true);
+  const [mantraFontSize, setMantraFontSize] = useState<ReadingFontSize>('normal');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const mantraFontConfig = {
+    normal: { fontSize: 15, lineHeight: 22 },
+    large: { fontSize: 18, lineHeight: 26 },
+    xlarge: { fontSize: 22, lineHeight: 30 },
+    jumbo: { fontSize: 26, lineHeight: 35 },
+  }[mantraFontSize];
 
   const { selectedAshtothramForJapa, clearSelectedAshtothram } = useAppMenu();
 
   const { session, start, decrement, undo, pause, resume, reset, clear } =
     useCountdownSession('japa');
-
-  // Keep script updated if user changes app language and hasn't manually overridden
-  useEffect(() => {
-    setPreferredScript(language === 'te' ? 'telugu' : 'sanskrit');
-  }, [language]);
 
   const handleSelectMantra = useCallback((mantra: MantraEntry) => {
     setMantraName(mantra.name);
@@ -241,8 +244,9 @@ export function JapaScreen() {
               onPress={() => setIsLibraryOpen(true)}
               accessibilityRole="button"
             >
+              <TabIcon name="MantraLibrary" color={colors.goldSoft} size={15} />
               <Text style={styles.browseButtonText}>
-                📖 {t.japa.browseLibrary}
+                {t.japa.browseLibrary}
               </Text>
             </Pressable>
           </View>
@@ -276,64 +280,26 @@ export function JapaScreen() {
                 ) : null}
               </View>
 
-              <View style={styles.scriptMiniSwitcher}>
-                <Pressable
-                  onPress={() => setPreferredScript('sanskrit')}
-                  style={[
-                    styles.scriptMiniTab,
-                    preferredScript === 'sanskrit' && styles.scriptMiniTabActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.scriptMiniTabText,
-                      preferredScript === 'sanskrit' &&
-                        styles.scriptMiniTabTextActive,
-                    ]}
-                  >
-                    संस्कृत
-                  </Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => setPreferredScript('telugu')}
-                  style={[
-                    styles.scriptMiniTab,
-                    preferredScript === 'telugu' && styles.scriptMiniTabActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.scriptMiniTabText,
-                      preferredScript === 'telugu' &&
-                        styles.scriptMiniTabTextActive,
-                    ]}
-                  >
-                    తెలుగు
-                  </Text>
-                </Pressable>
-                <Pressable
-                  onPress={() => setPreferredScript('english')}
-                  style={[
-                    styles.scriptMiniTab,
-                    preferredScript === 'english' && styles.scriptMiniTabActive,
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.scriptMiniTabText,
-                      preferredScript === 'english' &&
-                        styles.scriptMiniTabTextActive,
-                    ]}
-                  >
-                    En
-                  </Text>
-                </Pressable>
-              </View>
+              {isMantraTextExpanded ? (
+                <FontSizeControl
+                  size={mantraFontSize}
+                  onChangeSize={setMantraFontSize}
+                  compact
+                />
+              ) : null}
             </View>
 
             {isMantraTextExpanded ? (
               <View style={styles.mantraTextBody}>
-                <Text style={styles.mantraTextContent}>
+                <Text
+                  style={[
+                    styles.mantraTextContent,
+                    {
+                      fontSize: mantraFontConfig.fontSize,
+                      lineHeight: mantraFontConfig.lineHeight,
+                    },
+                  ]}
+                >
                   {activeMantraText}
                 </Text>
               </View>
@@ -427,8 +393,6 @@ export function JapaScreen() {
           refreshData();
         }}
         onSelectMantra={handleSelectMantra}
-        preferredScript={preferredScript}
-        onChangeScript={setPreferredScript}
       />
     </KeyboardAvoidingView>
   );
@@ -479,6 +443,9 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   browseButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
     backgroundColor: colors.surface,
     borderColor: colors.gold,
     borderWidth: 1,
