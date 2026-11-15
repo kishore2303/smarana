@@ -156,6 +156,16 @@ export function PradakshinaScreen() {
           />
         </View>
 
+        {/* Smart Auto-Loop Feature Banner */}
+        <View style={styles.autoLoopTipCard}>
+          <Text style={styles.autoLoopTipTitle}>
+            ✨ {t.pradakshina.autoLoopTitle}
+          </Text>
+          <Text style={styles.autoLoopTipDesc}>
+            {t.pradakshina.autoLoopSubtitle}
+          </Text>
+        </View>
+
         {errorMessage ? <Text style={styles.error}>{errorMessage}</Text> : null}
 
         <Pressable
@@ -265,6 +275,25 @@ const styles = StyleSheet.create({
   saveLabel: {
     color: colors.textSecondary,
     fontSize: 14,
+  },
+  autoLoopTipCard: {
+    backgroundColor: 'rgba(212, 175, 55, 0.08)',
+    borderColor: 'rgba(212, 175, 55, 0.35)',
+    borderWidth: 1,
+    borderRadius: 14,
+    padding: 14,
+    marginBottom: 16,
+  },
+  autoLoopTipTitle: {
+    color: colors.goldSoft,
+    fontSize: 14,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  autoLoopTipDesc: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    lineHeight: 18,
   },
   error: {
     color: colors.danger,
