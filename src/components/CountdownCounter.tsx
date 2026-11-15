@@ -18,6 +18,7 @@ import { activateKeepAwakeAsync, deactivateKeepAwake } from 'expo-keep-awake';
 import { StatusBar } from 'expo-status-bar';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { HeaderBackButton } from './HeaderBackButton';
+import { FontSizeControl, ReadingFontSize } from './FontSizeControl';
 import { MalaProgressRing } from './MalaProgressRing';
 import { getAppSettings } from '../db/database';
 import { computeMalaProgress } from '../engine/malaEngine';
@@ -96,6 +97,14 @@ export function CountdownCounter({
   const [isDimMode, setIsDimMode] = useState(false);
   const [isPocketModeActive, setIsPocketModeActive] = useState(false);
   const [isMantraTextVisible, setIsMantraTextVisible] = useState(false);
+  const [readerFontSize, setReaderFontSize] = useState<ReadingFontSize>('normal');
+
+  const readerFontConfig = {
+    normal: { mantra: 14, mantraLine: 20, nama: 15, namaLine: 21 },
+    large: { mantra: 17, mantraLine: 24, nama: 18, namaLine: 24 },
+    xlarge: { mantra: 21, mantraLine: 28, nama: 22, namaLine: 28 },
+    jumbo: { mantra: 25, mantraLine: 34, nama: 26, namaLine: 33 },
+  }[readerFontSize];
 
   useFocusEffect(
     useCallback(() => {
@@ -542,10 +551,26 @@ export function CountdownCounter({
       ) : null}
       {currentNama && currentNamaText ? (
         <View style={styles.namaPill}>
-          <Text style={styles.namaPillNum}>
-            {t.ashtothram.currentNama} {currentNama.num} / {ashtothramNames?.length}
-          </Text>
-          <Text style={styles.namaPillText} numberOfLines={2}>
+          <View style={styles.namaPillHeader}>
+            <Text style={styles.namaPillNum}>
+              {t.ashtothram.currentNama} {currentNama.num} / {ashtothramNames?.length}
+            </Text>
+            <FontSizeControl
+              size={readerFontSize}
+              onChangeSize={setReaderFontSize}
+              compact
+            />
+          </View>
+          <Text
+            style={[
+              styles.namaPillText,
+              {
+                fontSize: readerFontConfig.nama,
+                lineHeight: readerFontConfig.namaLine,
+              },
+            ]}
+            numberOfLines={2}
+          >
             {currentNamaText}
           </Text>
         </View>
@@ -723,7 +748,25 @@ export function CountdownCounter({
 
       {mantraText && isMantraTextVisible ? (
         <View style={styles.activeMantraCard}>
-          <Text style={styles.activeMantraCardText}>{mantraText}</Text>
+          <View style={styles.activeMantraCardHeader}>
+            <Text style={styles.activeMantraCardTag}>🕉 {displayLabel}</Text>
+            <FontSizeControl
+              size={readerFontSize}
+              onChangeSize={setReaderFontSize}
+              compact
+            />
+          </View>
+          <Text
+            style={[
+              styles.activeMantraCardText,
+              {
+                fontSize: readerFontConfig.mantra,
+                lineHeight: readerFontConfig.mantraLine,
+              },
+            ]}
+          >
+            {mantraText}
+          </Text>
         </View>
       ) : null}
 
@@ -915,6 +958,17 @@ const styles = StyleSheet.create({
     borderLeftWidth: 3,
     borderLeftColor: colors.gold,
   },
+  activeMantraCardHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  activeMantraCardTag: {
+    color: colors.goldSoft,
+    fontSize: 12,
+    fontWeight: '700',
+  },
   activeMantraCardText: {
     color: colors.ivoryWarm,
     fontSize: 14,
@@ -931,7 +985,15 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     marginTop: 8,
     alignItems: 'center',
-    maxWidth: 240,
+    maxWidth: 290,
+  },
+  namaPillHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    width: '100%',
+    marginBottom: 4,
+    gap: 8,
   },
   namaPillNum: {
     color: colors.goldSoft,
@@ -942,9 +1004,10 @@ const styles = StyleSheet.create({
   },
   namaPillText: {
     color: colors.ivoryWarm,
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 15,
+    fontWeight: '700',
     textAlign: 'center',
+    lineHeight: 21,
   },
   dimNamaPill: {
     marginTop: 14,

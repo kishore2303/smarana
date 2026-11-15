@@ -1,7 +1,15 @@
 import React from 'react';
 import Svg, { Circle, Path } from 'react-native-svg';
 
-export type IconName = 'Home' | 'Pradakshina' | 'Japa' | 'History' | 'Settings';
+export type IconName =
+  | 'Home'
+  | 'Pradakshina'
+  | 'Japa'
+  | 'History'
+  | 'Settings'
+  | 'Ashtothram'
+  | 'MantraLibrary'
+  | 'Panchangam';
 
 interface TabIconProps {
   name: IconName;
@@ -11,6 +19,70 @@ interface TabIconProps {
 
 export function TabIcon({ name, color, size = 24 }: TabIconProps) {
   switch (name) {
+    case 'Ashtothram':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          {/* Symmetrical lotus flower in gold/cream vector stroke and subtle fill */}
+          <Path
+            d="M12 4.5 C13.5 7.5 15.5 10 18 11.5 C15.5 12.5 13.5 11.5 12 8 C10.5 11.5 8.5 12.5 6 11.5 C8.5 10 10.5 7.5 12 4.5 Z"
+            fill={color}
+            opacity={0.9}
+          />
+          <Path
+            d="M12 8 C14 11 17 13.5 20.5 13.5 C17.5 15.5 14.5 14.5 12 11.5 C9.5 14.5 6.5 15.5 3.5 13.5 C7 13.5 10 11 12 8 Z"
+            fill={color}
+            opacity={0.65}
+          />
+          <Path
+            d="M7 18.5 Q12 20.5 17 18.5"
+            stroke={color}
+            strokeWidth={1.8}
+            strokeLinecap="round"
+          />
+        </Svg>
+      );
+
+    case 'Panchangam':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          {/* Radiant Sun & Crescent Moon sacred calendar emblem */}
+          <Path
+            d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 0 1-4.4 2.26 5.403 5.403 0 0 1-3.14-9.8A9.006 9.006 0 0 0 12 3Z"
+            stroke={color}
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <Circle cx="12" cy="12" r="2.5" fill={color} />
+          <Path
+            d="M12 1.5v2M12 20.5v2M1.5 12h2M20.5 12h2"
+            stroke={color}
+            strokeWidth={1.6}
+            strokeLinecap="round"
+          />
+        </Svg>
+      );
+
+    case 'MantraLibrary':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          {/* Open scripture / book icon */}
+          <Path
+            d="M4 19.5 V5 A2.5 2.5 0 0 1 6.5 2.5 H20 V18 H6.5 A2.5 2.5 0 0 0 4 20.5 A2.5 2.5 0 0 1 6.5 18 H20"
+            stroke={color}
+            strokeWidth={1.8}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+          <Path
+            d="M8 7 H16 M8 11 H14"
+            stroke={color}
+            strokeWidth={1.8}
+            strokeLinecap="round"
+          />
+        </Svg>
+      );
+
     case 'Home':
       return (
         <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">

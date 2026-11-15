@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import {
+  FlatList,
+  Image,
   KeyboardAvoidingView,
   Modal,
   Platform,
   Pressable,
-  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -12,9 +13,13 @@ import {
 } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { ALL_ASHTOTHRAMS } from '../data/ashtothrams';
+import { getDeityImage } from '../data/deityImages';
+import { FontSizeControl, ReadingFontSize } from './FontSizeControl';
+import { TabIcon } from './TabIcon';
+import { TopLanguageToggle } from './TopLanguageToggle';
 import { useLanguage } from '../i18n/LanguageContext';
 import { colors } from '../theme/colors';
-import type { MantraEntry, MantraScript } from '../types/practice';
+import type { AshtothramName, MantraEntry, MantraScript } from '../types/practice';
 
 interface AshtothramModalProps {
   visible: boolean;
@@ -23,17 +28,6 @@ interface AshtothramModalProps {
   preferredScript?: MantraScript;
   onChangeScript?: (script: MantraScript) => void;
 }
-
-const DEITY_ICONS: Record<string, string> = {
-  'builtin-ashtothram-ganesha': '🐘',
-  'builtin-ashtothram-shiva': '🔱',
-  'builtin-ashtothram-venkateswara': '🛕',
-  'builtin-ashtothram-lakshmi': '🪷',
-  'builtin-ashtothram-hanuman': '🚩',
-  'builtin-ashtothram-krishna': '🦚',
-  'builtin-ashtothram-rama': '🏹',
-  'builtin-ashtothram-durga': '🦁',
-};
 
 export function AshtothramModal({
   visible,
@@ -47,16 +41,9 @@ export function AshtothramModal({
 
   const [selectedDeity, setSelectedDeity] = useState<MantraEntry | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
-  const [internalScript, setInternalScript] = useState<MantraScript>(
-    preferredScript || (language === 'te' ? 'telugu' : 'sanskrit')
-  );
-
-  const activeScript = preferredScript || internalScript;
-
-  const handleScriptChange = (s: MantraScript) => {
-    setInternalScript(s);
-    onChangeScript?.(s);
-  };
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [textSize, setTextSize] = useState<ReadingFontSize>('large');
+  const [bookmarkedNama, setBookmarkedNama] = useState<number | null>(null);
 
   const filteredDeities = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -92,6 +79,20 @@ export function AshtothramModal({
     onClose();
   };
 
+  const handleBackToCatalog = () => {
+    setSelectedDeity(null);
+    setSearchQuery('');
+    setIsSearchOpen(false);
+    setBookmarkedNama(null);
+  };
+
+  const fontSizeConfig = {
+    normal: { primary: 16, secondary: 13, line: 24 },
+    large: { primary: 19, secondary: 14, line: 28 },
+    xlarge: { primary: 23, secondary: 15, line: 33 },
+    jumbo: { primary: 27, secondary: 17, line: 38 },
+  }[textSize];
+
   return (
     <Modal
       visible={visible}
@@ -103,231 +104,326 @@ export function AshtothramModal({
         style={[
           styles.container,
           {
-            paddingTop: Math.max(insets.top, 16),
-            paddingBottom: Math.max(insets.bottom, 16),
+            paddingTop: Math.max(insets.top, 14),
+            paddingBottom: Math.max(insets.bottom, 12),
           },
         ]}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        {/* Header */}
-        <View style={styles.header}>
-          <View style={styles.headerTitleBlock}>
-            {selectedDeity ? (
-              <Pressable
-                style={styles.backButton}
-                onPress={() => {
-                  setSelectedDeity(null);
-                  setSearchQuery('');
-                }}
-                hitSlop={8}
-              >
-                <Text style={styles.backButtonText}>← {t.ashtothram.allDeities}</Text>
-              </Pressable>
-            ) : (
-              <Text style={styles.headerEyebrow}>{t.ashtothram.badge}</Text>
-            )}
-            <Text style={styles.headerTitle} numberOfLines={1}>
-              {selectedDeity ? selectedDeity.name : t.ashtothram.title}
-            </Text>
-          </View>
-
-          <Pressable
-            style={styles.closeButton}
-            onPress={onClose}
-            accessibilityRole="button"
-            accessibilityLabel={t.common.cancel}
-          >
-            <Text style={styles.closeButtonText}>✕</Text>
-          </Pressable>
-        </View>
-
-        {/* Script Selection Bar */}
-        <View style={styles.scriptBar}>
-          <Pressable
-            style={[
-              styles.scriptTab,
-              activeScript === 'sanskrit' && styles.scriptTabSelected,
-            ]}
-            onPress={() => handleScriptChange('sanskrit')}
-          >
-            <Text
-              style={[
-                styles.scriptTabText,
-                activeScript === 'sanskrit' && styles.scriptTabTextSelected,
-              ]}
-            >
-              {t.japa.sanskritTab}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            style={[
-              styles.scriptTab,
-              activeScript === 'telugu' && styles.scriptTabSelected,
-            ]}
-            onPress={() => handleScriptChange('telugu')}
-          >
-            <Text
-              style={[
-                styles.scriptTabText,
-                activeScript === 'telugu' && styles.scriptTabTextSelected,
-              ]}
-            >
-              {t.japa.teluguTab}
-            </Text>
-          </Pressable>
-
-          <Pressable
-            style={[
-              styles.scriptTab,
-              activeScript === 'english' && styles.scriptTabSelected,
-            ]}
-            onPress={() => handleScriptChange('english')}
-          >
-            <Text
-              style={[
-                styles.scriptTabText,
-                activeScript === 'english' && styles.scriptTabTextSelected,
-              ]}
-            >
-              {t.japa.englishTab}
-            </Text>
-          </Pressable>
-        </View>
-
-        {/* Search Bar */}
-        <View style={styles.searchRow}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder={
-              selectedDeity
-                ? t.ashtothram.searchPlaceholder
-                : t.ashtothram.searchPlaceholder
-            }
-            placeholderTextColor={colors.textMuted}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            clearButtonMode="while-editing"
-          />
-        </View>
-
-        {/* VIEW 1: Deity Selection List */}
+        {/* VIEW 1: Deity Selection Catalog (2-Column Visual Grid) */}
         {!selectedDeity ? (
-          <ScrollView
-            style={styles.contentScroll}
-            contentContainerStyle={styles.deitiesGrid}
-            keyboardShouldPersistTaps="handled"
-          >
-            <Text style={styles.sectionSubtitle}>
-              {t.ashtothram.subtitle}
-            </Text>
-
-            {filteredDeities.map((item) => {
-              const icon = DEITY_ICONS[item.id] || '🌸';
-              return (
-                <Pressable
-                  key={item.id}
-                  style={({ pressed }) => [
-                    styles.deityCard,
-                    pressed && styles.deityCardPressed,
-                  ]}
-                  onPress={() => {
-                    setSelectedDeity(item);
-                    setSearchQuery('');
-                  }}
-                >
-                  <View style={styles.deityCardHeader}>
-                    <Text style={styles.deityIcon}>{icon}</Text>
-                    <View style={styles.deityBadge}>
-                      <Text style={styles.deityBadgeText}>108</Text>
-                    </View>
-                  </View>
-
-                  <Text style={styles.deityName} numberOfLines={2}>
-                    {item.name}
-                  </Text>
-                  {item.deity ? (
-                    <Text style={styles.deitySubtext}>{item.deity}</Text>
-                  ) : null}
-
-                  <View style={styles.deityCardFooter}>
-                    <Text style={styles.viewLinkText}>
-                      {t.ashtothram.viewAllNames} →
-                    </Text>
-                  </View>
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        ) : (
-          /* VIEW 2: Selected Deity 108 Names List */
-          <View style={styles.namesContainer}>
-            {/* Start Archana Action Bar */}
-            <View style={styles.actionBar}>
-              <View style={styles.actionMeta}>
-                <Text style={styles.actionCount}>
-                  {selectedDeity.names?.length ?? 108} {t.ashtothram.namesCount}
-                </Text>
-                <Text style={styles.actionDeity}>
-                  {selectedDeity.deity}
+          <View style={styles.flex}>
+            {/* Catalog Header */}
+            <View style={styles.catalogHeader}>
+              <View style={styles.catalogTitleBlock}>
+                <View style={styles.eyebrowRow}>
+                  <TabIcon name="Ashtothram" color={colors.goldSoft} size={15} />
+                  <Text style={styles.catalogEyebrow}>{t.ashtothram.badge}</Text>
+                </View>
+                <Text style={styles.catalogTitle}>{t.ashtothram.title}</Text>
+                <Text style={styles.catalogSubtitle} numberOfLines={1}>
+                  {t.ashtothram.subtitle}
                 </Text>
               </View>
 
-              <Pressable
-                style={({ pressed }) => [
-                  styles.startArchanaButton,
-                  pressed && styles.buttonPressed,
-                ]}
-                onPress={() => handleStartArchana(selectedDeity)}
-                accessibilityRole="button"
-              >
-                <Text style={styles.startArchanaButtonText}>
-                  🌸 {t.ashtothram.startArchana}
-                </Text>
-              </Pressable>
+              <View style={styles.catalogRightActions}>
+                <TopLanguageToggle compact />
+                <Pressable
+                  style={styles.circleCloseButton}
+                  onPress={onClose}
+                  accessibilityRole="button"
+                  accessibilityLabel={t.common.cancel}
+                  hitSlop={10}
+                >
+                  <Text style={styles.circleCloseText}>✕</Text>
+                </Pressable>
+              </View>
             </View>
 
-            <ScrollView
-              style={styles.contentScroll}
+            {/* Search Input Bar */}
+            <View style={styles.searchBarWrapper}>
+              <View style={styles.searchInputContainer}>
+                <Text style={styles.searchIconText}>🔍</Text>
+                <TextInput
+                  style={styles.searchInputField}
+                  placeholder={t.ashtothram.searchPlaceholder}
+                  placeholderTextColor={colors.textMuted}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  clearButtonMode="while-editing"
+                />
+                {searchQuery.length > 0 ? (
+                  <Pressable
+                    onPress={() => setSearchQuery('')}
+                    hitSlop={8}
+                    style={styles.clearSearchBtn}
+                  >
+                    <Text style={styles.clearSearchText}>✕</Text>
+                  </Pressable>
+                ) : null}
+              </View>
+            </View>
+
+            {/* Compact Deities List with Full Portrait Avatars */}
+            <FlatList
+              data={filteredDeities}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.deityListContainer}
+              keyboardShouldPersistTaps="handled"
+              renderItem={({ item }) => {
+                const imageSrc = getDeityImage(item.id);
+                return (
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.deityListItem,
+                      pressed && styles.deityListItemPressed,
+                    ]}
+                    onPress={() => {
+                      setSelectedDeity(item);
+                      setSearchQuery('');
+                      setIsSearchOpen(false);
+                      setBookmarkedNama(null);
+                    }}
+                    accessibilityRole="button"
+                  >
+                    {imageSrc ? (
+                      <Image
+                        source={imageSrc}
+                        style={styles.deityAvatar}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <View style={styles.deityAvatarFallback}>
+                        <TabIcon
+                          name="Ashtothram"
+                          color={colors.goldSoft}
+                          size={24}
+                        />
+                      </View>
+                    )}
+
+                    <View style={styles.deityListInfo}>
+                      <Text style={styles.deityListTitle} numberOfLines={1}>
+                        {item.name.replace(' Ashtottara Shatanamavali', '')}
+                      </Text>
+                      {item.deity ? (
+                        <Text style={styles.deityListSubtitle} numberOfLines={1}>
+                          {item.deity}
+                        </Text>
+                      ) : null}
+                    </View>
+
+                    <Text style={styles.deityListChevron}>›</Text>
+                  </Pressable>
+                );
+              }}
+            />
+          </View>
+        ) : (
+          /* VIEW 2: 108 Sacred Names Reader (Ultra-Clean, Large Readable Area) */
+          <View style={styles.flex}>
+            {/* Streamlined Minimalist Header */}
+            <View style={styles.readerHeader}>
+              <Pressable
+                style={styles.readerBackButton}
+                onPress={handleBackToCatalog}
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel={t.ashtothram.allDeities}
+              >
+                <Text style={styles.readerBackArrow}>←</Text>
+              </Pressable>
+
+              <View style={styles.readerTitleBlock}>
+                {getDeityImage(selectedDeity.id) ? (
+                  <Image
+                    source={getDeityImage(selectedDeity.id)!}
+                    style={styles.readerAvatar}
+                    resizeMode="cover"
+                  />
+                ) : null}
+                <View style={styles.readerTitleTextWrap}>
+                  <Text style={styles.readerTitle} numberOfLines={1}>
+                    {selectedDeity.name.replace(' Ashtottara Shatanamavali', '')}
+                  </Text>
+                  <Text style={styles.readerCount}>
+                    {selectedDeity.names?.length ?? 108} {t.ashtothram.namesCount}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.readerHeaderActions}>
+                {/* Font Size Adjuster Control (A- / A+) for Elderly devotees */}
+                <FontSizeControl
+                  size={textSize}
+                  onChangeSize={setTextSize}
+                  compact
+                />
+
+                {/* Collapsible Search Toggle Button */}
+                <Pressable
+                  style={[
+                    styles.readerActionBtn,
+                    isSearchOpen && styles.readerActionBtnActive,
+                  ]}
+                  onPress={() => {
+                    setIsSearchOpen((prev) => !prev);
+                    if (isSearchOpen) setSearchQuery('');
+                  }}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel="Toggle search"
+                >
+                  <Text style={styles.readerActionText}>🔍</Text>
+                </Pressable>
+
+                {/* Close Modal Button */}
+                <Pressable
+                  style={styles.readerCloseBtn}
+                  onPress={onClose}
+                  hitSlop={10}
+                  accessibilityRole="button"
+                  accessibilityLabel={t.common.cancel}
+                >
+                  <Text style={styles.readerCloseText}>✕</Text>
+                </Pressable>
+              </View>
+            </View>
+
+            {/* Collapsible Search Input Bar */}
+            {isSearchOpen ? (
+              <View style={styles.readerSearchRow}>
+                <TextInput
+                  style={styles.readerSearchInput}
+                  placeholder={t.ashtothram.searchPlaceholder}
+                  placeholderTextColor={colors.textMuted}
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  autoFocus
+                  clearButtonMode="while-editing"
+                />
+                {searchQuery.length > 0 ? (
+                  <Pressable
+                    onPress={() => setSearchQuery('')}
+                    hitSlop={8}
+                    style={styles.readerClearBtn}
+                  >
+                    <Text style={styles.readerClearText}>✕</Text>
+                  </Pressable>
+                ) : null}
+              </View>
+            ) : null}
+
+
+
+            {/* Tap-to-Bookmark Hint */}
+            <View style={styles.bookmarkHintRow}>
+              <Text style={styles.bookmarkHintText}>
+                {bookmarkedNama
+                  ? `${t.ashtothram.currentNama} ${bookmarkedNama} / 108`
+                  : t.ashtothram.tapToHighlight}
+              </Text>
+            </View>
+
+            {/* 108 Names List: Sacred Book Layout (No Clutter, Open Spacing) */}
+            <FlatList
+              data={filteredNames}
+              keyExtractor={(item) => String(item.num)}
               contentContainerStyle={styles.namesListContent}
               keyboardShouldPersistTaps="handled"
-            >
-              {filteredNames.map((nama) => {
-                const primaryText =
-                  activeScript === 'sanskrit'
-                    ? nama.sanskrit
-                    : activeScript === 'telugu'
-                      ? nama.telugu
-                      : nama.english;
+              initialNumToRender={20}
+              maxToRenderPerBatch={30}
+              windowSize={11}
+              renderItem={({ item }: { item: AshtothramName }) => {
+                const isTelugu = language === 'te';
+                const primaryText = isTelugu ? item.telugu : item.english || item.sanskrit;
+                const secondaryText = isTelugu ? item.sanskrit : item.telugu;
 
-                const secondaryText =
-                  activeScript === 'sanskrit'
-                    ? nama.telugu
-                    : activeScript === 'telugu'
-                      ? nama.sanskrit
-                      : nama.sanskrit;
+                const isBookmarked = bookmarkedNama === item.num;
 
                 return (
-                  <View key={nama.num} style={styles.namaRow}>
-                    <View style={styles.namaNumBadge}>
-                      <Text style={styles.namaNumText}>{nama.num}</Text>
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.namaRow,
+                      isBookmarked && styles.namaRowBookmarked,
+                      pressed && styles.namaRowPressed,
+                    ]}
+                    onPress={() =>
+                      setBookmarkedNama((prev) =>
+                        prev === item.num ? null : item.num
+                      )
+                    }
+                  >
+                    <View style={styles.namaNumColumn}>
+                      <Text
+                        style={[
+                          styles.namaNumText,
+                          isBookmarked && styles.namaNumTextBookmarked,
+                        ]}
+                      >
+                        {item.num < 10 ? `0${item.num}` : item.num}
+                      </Text>
+                      {isBookmarked ? (
+                        <View style={styles.bookmarkDot} />
+                      ) : null}
                     </View>
-                    <View style={styles.namaTextBlock}>
-                      <Text style={styles.namaPrimaryText}>{primaryText}</Text>
-                      {activeScript !== 'english' ? (
-                        <Text style={styles.namaSecondaryText}>
-                          {nama.english}
+
+                    <View style={styles.namaTextColumn}>
+                      <Text
+                        style={[
+                          styles.namaPrimaryText,
+                          {
+                            fontSize: fontSizeConfig.primary,
+                            lineHeight: fontSizeConfig.line,
+                          },
+                          isBookmarked && styles.namaPrimaryTextBookmarked,
+                        ]}
+                      >
+                        {primaryText}
+                      </Text>
+
+                      {isTelugu ? (
+                        <Text
+                          style={[
+                            styles.namaSecondaryText,
+                            { fontSize: fontSizeConfig.secondary },
+                          ]}
+                        >
+                          {item.english}
                         </Text>
                       ) : (
-                        <Text style={styles.namaSecondaryText}>
+                        <Text
+                          style={[
+                            styles.namaSecondaryText,
+                            { fontSize: fontSizeConfig.secondary },
+                          ]}
+                        >
                           {secondaryText}
                         </Text>
                       )}
                     </View>
-                  </View>
+                  </Pressable>
                 );
-              })}
-            </ScrollView>
+              }}
+            />
+
+            {/* Floating "Start Archana" Bottom Bar */}
+            <View style={styles.floatingBarContainer}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.floatingStartButton,
+                  pressed && styles.floatingStartButtonPressed,
+                ]}
+                onPress={() => handleStartArchana(selectedDeity)}
+                accessibilityRole="button"
+                accessibilityLabel={t.ashtothram.startArchana}
+              >
+                <TabIcon name="Ashtothram" color={colors.background} size={16} />
+                <Text style={styles.floatingStartButtonText}>
+                  {t.ashtothram.startArchana}
+                </Text>
+              </Pressable>
+            </View>
           </View>
         )}
       </KeyboardAvoidingView>
@@ -340,247 +436,412 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.background,
   },
-  header: {
+  flex: {
+    flex: 1,
+  },
+
+  /* Catalog View Styles */
+  catalogHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     paddingHorizontal: 20,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    paddingTop: 8,
+    paddingBottom: 10,
   },
-  headerTitleBlock: {
+  catalogTitleBlock: {
     flex: 1,
-    marginRight: 10,
+    marginRight: 12,
   },
-  headerEyebrow: {
+  eyebrowRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginBottom: 4,
+  },
+  catalogEyebrow: {
     color: colors.gold,
     fontSize: 11,
     fontWeight: '700',
-    letterSpacing: 1.4,
+    letterSpacing: 1.5,
   },
-  headerTitle: {
+  catalogTitle: {
     color: colors.textPrimary,
-    fontSize: 20,
-    fontWeight: '700',
+    fontSize: 22,
+    fontWeight: '800',
+    letterSpacing: 0.3,
+  },
+  catalogSubtitle: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    marginTop: 3,
+  },
+  catalogRightActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
     marginTop: 2,
   },
-  backButton: {
-    marginBottom: 2,
-  },
-  backButtonText: {
-    color: colors.goldSoft,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  closeButton: {
+  circleCloseButton: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderWidth: 1,
-    borderRadius: 20,
-    width: 36,
-    height: 36,
+    borderRadius: 18,
+    width: 34,
+    height: 34,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  circleCloseText: {
+    color: colors.textSecondary,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  searchBarWrapper: {
+    paddingHorizontal: 16,
+    marginBottom: 10,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    height: 40,
+  },
+  searchIconText: {
+    fontSize: 14,
+    marginRight: 8,
+    opacity: 0.7,
+  },
+  searchInputField: {
+    flex: 1,
+    color: colors.textPrimary,
+    fontSize: 14,
+    paddingVertical: 0,
+  },
+  clearSearchBtn: {
+    padding: 4,
+  },
+  clearSearchText: {
+    color: colors.textMuted,
+    fontSize: 13,
+  },
+
+  /* Compact Deities List Layout */
+  deityListContainer: {
+    paddingHorizontal: 16,
+    paddingBottom: 24,
+    gap: 8,
+  },
+  deityListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: 10,
+    gap: 12,
+  },
+  deityListItemPressed: {
+    backgroundColor: colors.surfaceAlt,
+    borderColor: colors.gold,
+  },
+  deityAvatar: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.gold,
+  },
+  deityAvatarFallback: {
+    width: 48,
+    height: 48,
+    borderRadius: 8,
+    backgroundColor: colors.surfaceAlt,
+    borderWidth: 1,
+    borderColor: colors.border,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  closeButtonText: {
-    color: colors.textSecondary,
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  scriptBar: {
-    flexDirection: 'row',
-    backgroundColor: colors.surface,
-    padding: 4,
-    marginHorizontal: 20,
-    marginTop: 12,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  scriptTab: {
+  deityListInfo: {
     flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderRadius: 8,
   },
-  scriptTabSelected: {
-    backgroundColor: colors.earth,
+  deityListTitle: {
+    color: colors.textPrimary,
+    fontSize: 15,
+    fontWeight: '700',
+    marginBottom: 2,
   },
-  scriptTabText: {
-    color: colors.textSecondary,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  scriptTabTextSelected: {
+  deityListSubtitle: {
     color: colors.goldSoft,
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  deityListChevron: {
+    color: colors.textMuted,
+    fontSize: 22,
+    fontWeight: '300',
+    paddingRight: 4,
+  },
+
+  /* Reader View (108 Names) Minimalist Header */
+  readerHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  readerBackButton: {
+    paddingRight: 10,
+    paddingVertical: 4,
+  },
+  readerBackArrow: {
+    color: colors.goldSoft,
+    fontSize: 20,
     fontWeight: '700',
   },
-  searchRow: {
-    paddingHorizontal: 20,
-    marginTop: 12,
+  readerTitleBlock: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
-  searchInput: {
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
+  readerAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    color: colors.textPrimary,
-    fontSize: 14,
+    borderColor: colors.gold,
   },
-  contentScroll: {
+  readerTitleTextWrap: {
     flex: 1,
   },
-  sectionSubtitle: {
-    color: colors.textSecondary,
-    fontSize: 14,
-    lineHeight: 20,
-    marginBottom: 12,
+  readerTitle: {
+    color: colors.textPrimary,
+    fontSize: 16,
+    fontWeight: '700',
   },
-  deitiesGrid: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 24,
-    gap: 12,
+  readerCount: {
+    color: colors.goldSoft,
+    fontSize: 11,
+    fontWeight: '600',
   },
-  deityCard: {
+  readerHeaderActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  readerActionBtn: {
     backgroundColor: colors.surface,
     borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 16,
-    padding: 16,
-  },
-  deityCardPressed: {
-    backgroundColor: colors.surfaceAlt,
-    borderColor: colors.gold,
-  },
-  deityCardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  deityIcon: {
-    fontSize: 28,
-  },
-  deityBadge: {
-    backgroundColor: colors.earth,
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-  },
-  deityBadgeText: {
-    color: colors.goldSoft,
-    fontSize: 12,
-    fontWeight: '700',
-  },
-  deityName: {
-    color: colors.textPrimary,
-    fontSize: 17,
-    fontWeight: '700',
-    marginBottom: 4,
-  },
-  deitySubtext: {
-    color: colors.goldSoft,
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  deityCardFooter: {
-    marginTop: 12,
-    alignItems: 'flex-end',
-  },
-  viewLinkText: {
-    color: colors.goldSoft,
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  namesContainer: {
-    flex: 1,
-  },
-  actionBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    backgroundColor: colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    marginTop: 8,
-    gap: 12,
-  },
-  actionMeta: {
-    flex: 1,
-  },
-  actionCount: {
-    color: colors.goldSoft,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  actionDeity: {
-    color: colors.textSecondary,
-    fontSize: 12,
-  },
-  startArchanaButton: {
-    backgroundColor: colors.gold,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  startArchanaButtonText: {
-    color: colors.background,
-    fontSize: 14,
-    fontWeight: '700',
-  },
-  buttonPressed: {
-    opacity: 0.85,
-  },
-  namesListContent: {
-    paddingHorizontal: 20,
-    paddingVertical: 12,
-    gap: 10,
-  },
-  namaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.surface,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
-    gap: 12,
-  },
-  namaNumBadge: {
-    backgroundColor: colors.surfaceAlt,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: 8,
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  namaNumText: {
-    color: colors.goldSoft,
+  readerActionBtnActive: {
+    backgroundColor: colors.surfaceAlt,
+    borderColor: colors.gold,
+  },
+  readerActionText: {
+    color: colors.textPrimary,
     fontSize: 13,
     fontWeight: '700',
   },
-  namaTextBlock: {
+  readerActionSup: {
+    fontSize: 9,
+    color: colors.goldSoft,
+    fontWeight: '800',
+  },
+  readerCloseBtn: {
+    backgroundColor: colors.surface,
+    borderColor: colors.border,
+    borderWidth: 1,
+    borderRadius: 16,
+    width: 32,
+    height: 32,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  readerCloseText: {
+    color: colors.textSecondary,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+
+  /* Reader Collapsible Search */
+  readerSearchRow: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    backgroundColor: colors.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  readerSearchInput: {
+    flex: 1,
+    height: 34,
+    color: colors.textPrimary,
+    fontSize: 13,
+    paddingHorizontal: 8,
+  },
+  readerClearBtn: {
+    padding: 6,
+  },
+  readerClearText: {
+    color: colors.textMuted,
+    fontSize: 13,
+  },
+
+  /* Slim Segmented Script Switcher */
+  scriptSegmentBar: {
+    flexDirection: 'row',
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 4,
+    backgroundColor: colors.surface,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 2,
+    height: 32,
+  },
+  scriptSegment: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  scriptSegmentActive: {
+    backgroundColor: colors.earth,
+  },
+  scriptSegmentText: {
+    color: colors.textSecondary,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  scriptSegmentTextActive: {
+    color: colors.goldSoft,
+    fontWeight: '700',
+  },
+
+  /* Bookmark Hint Row */
+  bookmarkHintRow: {
+    paddingHorizontal: 18,
+    paddingVertical: 3,
+  },
+  bookmarkHintText: {
+    color: colors.textMuted,
+    fontSize: 11,
+    fontStyle: 'italic',
+  },
+
+  /* Names List Content - Sacred Stotram Open Layout */
+  namesListContent: {
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 85, // Generous padding so floating button doesn't hide last items
+  },
+  namaRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: 'rgba(212, 175, 55, 0.15)',
+    borderRadius: 8,
+  },
+  namaRowBookmarked: {
+    backgroundColor: 'rgba(212, 175, 55, 0.10)',
+    borderLeftWidth: 3,
+    borderLeftColor: colors.gold,
+  },
+  namaRowPressed: {
+    backgroundColor: 'rgba(212, 175, 55, 0.05)',
+  },
+  namaNumColumn: {
+    width: 28,
+    paddingTop: 2,
+    alignItems: 'center',
+    marginRight: 10,
+  },
+  namaNumText: {
+    color: colors.goldSoft,
+    fontSize: 12,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
+    opacity: 0.8,
+  },
+  namaNumTextBookmarked: {
+    color: colors.gold,
+    opacity: 1,
+  },
+  bookmarkDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: colors.gold,
+    marginTop: 4,
+  },
+  namaTextColumn: {
     flex: 1,
   },
   namaPrimaryText: {
     color: colors.textPrimary,
-    fontSize: 16,
     fontWeight: '600',
-    lineHeight: 22,
+    letterSpacing: 0.2,
+  },
+  namaPrimaryTextBookmarked: {
+    color: colors.ivoryWarm,
+    fontWeight: '700',
   },
   namaSecondaryText: {
-    color: colors.textMuted,
-    fontSize: 13,
+    color: colors.goldSoft,
     marginTop: 2,
     fontStyle: 'italic',
+    opacity: 0.85,
+  },
+
+  /* Floating Bottom "Start Archana" Pill */
+  floatingBarContainer: {
+    position: 'absolute',
+    bottom: 12,
+    left: 20,
+    right: 20,
+    alignItems: 'center',
+  },
+  floatingStartButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: colors.gold,
+    borderRadius: 24,
+    paddingVertical: 11,
+    paddingHorizontal: 22,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 3 },
+    shadowOpacity: 0.35,
+    shadowRadius: 5,
+    elevation: 6,
+  },
+  floatingStartButtonPressed: {
+    opacity: 0.85,
+    transform: [{ scale: 0.98 }],
+  },
+  floatingStartButtonText: {
+    color: colors.background,
+    fontSize: 14,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
 });

@@ -11,6 +11,9 @@ interface MenuContextValue {
   isMantraLibraryOpen: boolean;
   openMantraLibrary: () => void;
   closeMantraLibrary: () => void;
+  isPanchangamOpen: boolean;
+  openPanchangam: () => void;
+  closePanchangam: () => void;
   selectedAshtothramForJapa: MantraEntry | null;
   startJapaWithAshtothram: (ashtothram: MantraEntry) => void;
   clearSelectedAshtothram: () => void;
@@ -22,6 +25,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAshtothramOpen, setIsAshtothramOpen] = useState(false);
   const [isMantraLibraryOpen, setIsMantraLibraryOpen] = useState(false);
+  const [isPanchangamOpen, setIsPanchangamOpen] = useState(false);
   const [selectedAshtothramForJapa, setSelectedAshtothramForJapa] =
     useState<MantraEntry | null>(null);
 
@@ -33,6 +37,9 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
 
   const openMantraLibrary = () => setIsMantraLibraryOpen(true);
   const closeMantraLibrary = () => setIsMantraLibraryOpen(false);
+
+  const openPanchangam = () => setIsPanchangamOpen(true);
+  const closePanchangam = () => setIsPanchangamOpen(false);
 
   const startJapaWithAshtothram = (ashtothram: MantraEntry) => {
     setSelectedAshtothramForJapa(ashtothram);
@@ -56,6 +63,9 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
         isMantraLibraryOpen,
         openMantraLibrary,
         closeMantraLibrary,
+        isPanchangamOpen,
+        openPanchangam,
+        closePanchangam,
         selectedAshtothramForJapa,
         startJapaWithAshtothram,
         clearSelectedAshtothram,
