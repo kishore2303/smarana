@@ -10,7 +10,8 @@ export type IconName =
   | 'Ashtothram'
   | 'MantraLibrary'
   | 'Panchangam'
-  | 'WhatsApp';
+  | 'WhatsApp'
+  | 'Pooja';
 
 interface TabIconProps {
   name: IconName;
@@ -20,6 +21,35 @@ interface TabIconProps {
 
 export function TabIcon({ name, color, size = 24 }: TabIconProps) {
   switch (name) {
+    case 'Pooja':
+      return (
+        <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">
+          {/* Sacred Diya / Lamp with divine flame */}
+          <Path
+            d="M12 2.5C12 2.5 9.5 6.5 9.5 9C9.5 10.38 10.62 11.5 12 11.5C13.38 11.5 14.5 10.38 14.5 9C14.5 6.5 12 2.5 12 2.5Z"
+            fill={color}
+          />
+          <Path
+            d="M4 14C4 17.5 7.5 20.5 12 20.5C16.5 20.5 20 17.5 20 14H4Z"
+            stroke={color}
+            strokeWidth={1.8}
+            strokeLinejoin="round"
+          />
+          <Path
+            d="M2 14H22"
+            stroke={color}
+            strokeWidth={1.8}
+            strokeLinecap="round"
+          />
+          <Path
+            d="M8.5 20.5L7 22H17L15.5 20.5"
+            stroke={color}
+            strokeWidth={1.6}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </Svg>
+      );
     case 'WhatsApp':
       return (
         <Svg width={size} height={size} viewBox="0 0 24 24" fill="none">

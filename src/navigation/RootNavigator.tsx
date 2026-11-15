@@ -11,6 +11,7 @@ import { AshtothramModal } from '../components/AshtothramModal';
 import { HamburgerMenuButton } from '../components/HamburgerMenuButton';
 import { HeaderBackButton } from '../components/HeaderBackButton';
 import { MantraLibraryModal } from '../components/MantraLibraryModal';
+import { NityaPoojaModal } from '../components/NityaPoojaModal';
 import { PanchangamModal } from '../components/PanchangamModal';
 import { SmaranaLogo } from '../components/SmaranaLogo';
 import { TabIcon } from '../components/TabIcon';
@@ -47,6 +48,9 @@ function InnerNavigator() {
     isPanchangamOpen,
     openPanchangam,
     closePanchangam,
+    isNityaPoojaOpen,
+    openNityaPooja,
+    closeNityaPooja,
     startJapaWithAshtothram,
   } = useAppMenu();
 
@@ -145,12 +149,19 @@ function InnerNavigator() {
       <AppMenuModal
         visible={isMenuOpen}
         onClose={closeMenu}
+        onOpenNityaPooja={openNityaPooja}
         onOpenAshtothram={openAshtothram}
         onOpenMantraLibrary={openMantraLibrary}
         onOpenPanchangam={openPanchangam}
         onNavigateTab={(tab) => {
           navigationRef.navigate(tab);
         }}
+      />
+
+      {/* Global Nitya Pooja Modal */}
+      <NityaPoojaModal
+        visible={isNityaPoojaOpen}
+        onClose={closeNityaPooja}
       />
 
       {/* Global Panchangam Modal */}

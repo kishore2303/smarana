@@ -203,6 +203,32 @@ export interface TranslationStrings {
     settingsDesc: string;
     aboutTitle: string;
     aboutDesc: string;
+    nityaPoojaTitle: string;
+    nityaPoojaDesc: string;
+  };
+  nityaPooja: {
+    cardBadge: string;
+    cardTitle: string;
+    cardDesc: string;
+    title: string;
+    subtitle: string;
+    modeLaghu: string;
+    modeShodasa: string;
+    modeLaghuHint: string;
+    modeShodasaHint: string;
+    stepCount: string;
+    actionTitle: string;
+    mantraTitle: string;
+    meaningTitle: string;
+    nextStep: string;
+    prevStep: string;
+    completePooja: string;
+    poojaCompletedTitle: string;
+    poojaCompletedDesc: string;
+    poojaDoneButton: string;
+    selectDeityPrompt: string;
+    ashtothramNamesCount: string;
+    changeDeity: string;
   };
   ashtothram: {
     badge: string;
@@ -504,6 +530,8 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
     },
     menu: {
       menuTitle: 'Smarana Menu',
+      nityaPoojaTitle: 'Nitya Pooja Vidhanam',
+      nityaPoojaDesc: 'Step-by-step guided daily worship',
       ashtothramTitle: 'Ashtothram',
       ashtothramDesc: '108 sacred names for Archana & Japa',
       japaTitle: 'Japa Counter',
@@ -521,6 +549,32 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       aboutTitle: 'About Smarana',
       aboutDesc:
         'Offline-first, privacy-first companion for Japa, Pradakshina and daily Sadhana.',
+    },
+    nityaPooja: {
+      cardBadge: 'DAILY WORSHIP',
+      cardTitle: 'Nitya Pooja Vidhanam',
+      cardDesc:
+        'Step-by-step guided daily pooja from lamp lighting to Mangala Harati with slokas, actions, and meaning.',
+      title: 'Nitya Pooja Vidhanam',
+      subtitle: 'Daily Vedic Worship Procedure',
+      modeLaghu: 'Laghu Pooja (5 Mins)',
+      modeShodasa: 'Shodashopachara (16 Steps)',
+      modeLaghuHint: '11 essential steps for busy weekday mornings',
+      modeShodasaHint: 'Full 16 canonical upacharas for sacred days',
+      stepCount: 'Step',
+      actionTitle: 'Action (చేయవలసిన క్రియ)',
+      mantraTitle: 'Mantra / Sloka (శ్లోకం)',
+      meaningTitle: 'Sacred Meaning (భావార్థం)',
+      nextStep: 'Next Step (తదుపరి) →',
+      prevStep: '← Previous (వెనుకకు)',
+      completePooja: '🪷 Complete Pooja (సమర్పణ)',
+      poojaCompletedTitle: 'Pooja Sampoornam!',
+      poojaCompletedDesc:
+        'May the Divine bless you and your family with health, peace, and spiritual well-being.',
+      poojaDoneButton: 'Close & Return Home',
+      selectDeityPrompt: 'Select Deity for Pushparchana',
+      ashtothramNamesCount: '108 Divine Names',
+      changeDeity: 'Change Deity',
     },
     ashtothram: {
       badge: '108 DIVINE NAMES',
@@ -823,6 +877,8 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
     },
     menu: {
       menuTitle: 'స్మరణ మెనూ',
+      nityaPoojaTitle: 'నిత్య పూజా విధానం',
+      nityaPoojaDesc: 'దశలవారీగా చేయవలసిన దిన పూజా పద్ధతి',
       ashtothramTitle: 'అష్టోత్తర శతనామావళి',
       ashtothramDesc: 'అర్చన మరియు జపానికి 108 నామాలు',
       japaTitle: 'జప కౌంటర్',
@@ -840,6 +896,32 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       aboutTitle: 'స్మరణ గురించి',
       aboutDesc:
         'జపం, ప్రదక్షిణ మరియు నిత్య సాధనకు ఆఫ్‌లైన్, గోప్యమైన సాధన సహచరి.',
+    },
+    nityaPooja: {
+      cardBadge: 'నిత్య పూజా విధానం',
+      cardTitle: 'నిత్య పూజా విధానం',
+      cardDesc:
+        'దీపారాధన నుండి హారతి వరకు వరుసగా చేయవలసిన క్రియలు, శ్లోకాలు, మరియు భావార్థాలతో కూడిన పూజా మార్గదర్శిని.',
+      title: 'నిత్య పూజా విధానం',
+      subtitle: 'ఆంధ్ర సంప్రదాయ దిన పూజా పద్ధతి',
+      modeLaghu: 'లఘు పూజ (5 ని॥)',
+      modeShodasa: 'షోడశోపచార పూజ (16 ఉపచారాలు)',
+      modeLaghuHint: 'రోజువారీ ఉదయపు సమయానికి 11 ముఖ్యమైన ఉపచారాలు',
+      modeShodasaHint: 'విశేష పర్వదినాలు & శుక్రవారాలకు సంపూర్ణ 16 ఉపచారాలు',
+      stepCount: 'క్రమం',
+      actionTitle: 'చేయవలసిన క్రియ',
+      mantraTitle: 'శ్లోకం / మంత్రం',
+      meaningTitle: 'భావార్థం',
+      nextStep: 'తదుపరి క్రియ →',
+      prevStep: '← వెనుకకు',
+      completePooja: '🪷 పూజ సంపూర్ణం (సమర్పణ)',
+      poojaCompletedTitle: 'పూజ సంపూర్ణమయింది!',
+      poojaCompletedDesc:
+        'భగవదనుగ్రహం మీ కుటుంబానికి ఆయురారోగ్య ఐశ్వర్యాలు మరియు ప్రశాంతతను ప్రసాదించుగాక.',
+      poojaDoneButton: 'ముగించి హోమ్‌కు వెళ్ళు',
+      selectDeityPrompt: 'పుష్పార్చనకు ఇష్టదేవతను ఎంచుకోండి',
+      ashtothramNamesCount: '108 దివ్య నామాలు',
+      changeDeity: 'దేవతను మార్చు',
     },
     ashtothram: {
       badge: '108 దివ్య నామాలు',

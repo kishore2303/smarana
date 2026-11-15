@@ -19,6 +19,7 @@ interface AppMenuModalProps {
   onOpenAshtothram: () => void;
   onOpenMantraLibrary: () => void;
   onOpenPanchangam: () => void;
+  onOpenNityaPooja: () => void;
   onNavigateTab: (tabName: 'Home' | 'Japa' | 'Pradakshina' | 'History' | 'Settings') => void;
 }
 
@@ -28,6 +29,7 @@ export function AppMenuModal({
   onOpenAshtothram,
   onOpenMantraLibrary,
   onOpenPanchangam,
+  onOpenNityaPooja,
   onNavigateTab,
 }: AppMenuModalProps) {
   const insets = useSafeAreaInsets();
@@ -43,6 +45,11 @@ export function AppMenuModal({
   const handleSelectAshtothram = () => {
     onClose();
     onOpenAshtothram();
+  };
+
+  const handleSelectNityaPooja = () => {
+    onClose();
+    onOpenNityaPooja();
   };
 
   const handleSelectMantraLibrary = () => {
@@ -112,6 +119,30 @@ export function AppMenuModal({
             ]}
             showsVerticalScrollIndicator={false}
           >
+            {/* FEATURED: Nitya Pooja Vidhanam Card */}
+            <Pressable
+              style={({ pressed }) => [
+                styles.featuredCard,
+                { borderColor: 'rgba(212, 175, 55, 0.6)', backgroundColor: '#132119' },
+                pressed && styles.cardPressed,
+              ]}
+              onPress={handleSelectNityaPooja}
+              accessibilityRole="button"
+            >
+              <View style={styles.itemTopRow}>
+                <Text style={styles.itemBadge}>DAILY WORSHIP</Text>
+                <TabIcon name="Pooja" color={colors.gold} size={20} />
+              </View>
+              <Text style={styles.featuredTitle}>{t.menu.nityaPoojaTitle}</Text>
+              <Text
+                style={styles.featuredDesc}
+                numberOfLines={1}
+                ellipsizeMode="tail"
+              >
+                {t.menu.nityaPoojaDesc}
+              </Text>
+            </Pressable>
+
             {/* FEATURED: Ashtothram Card */}
             <Pressable
               style={({ pressed }) => [
