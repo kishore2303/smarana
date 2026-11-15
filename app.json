@@ -30,6 +30,13 @@
     },
     "plugins": [
       "expo-sqlite",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/icon.png",
+          "color": "#172E27"
+        }
+      ],
       "./plugins/withPocketJapaService"
     ],
     "extra": {
