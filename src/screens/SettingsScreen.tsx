@@ -12,6 +12,7 @@ import { LiveCalibrationCard } from '../components/LiveCalibrationCard';
 import { getAppSettings, saveAppSettings } from '../db/database';
 import { useBackTapCalibration } from '../engine/useBackTapCalibration';
 import { useLanguage } from '../i18n/LanguageContext';
+import { scheduleDailyPanchangamReminder } from '../utils/notifications';
 import { colors } from '../theme/colors';
 import {
   DEFAULT_APP_SETTINGS,
@@ -300,6 +301,26 @@ export function SettingsScreen() {
               updateSettings({ ...settings, malaHapticEnabled: value })
             }
             trackColor={{ false: colors.surfaceAlt, true: colors.gold }}
+            thumbColor={colors.textPrimary}
+          />
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <View style={styles.row}>
+          <View style={styles.textBlock}>
+            <Text style={styles.cardTitle}>{t.settings.dailyPanchangamReminder}</Text>
+            <Text style={styles.cardDescription}>
+              {t.settings.dailyPanchangamReminderHint}
+            </Text>
+          </View>
+          <Switch
+            value={settings.dailyPanchangamReminder}
+            onValueChange={async (value) => {
+              updateSettings({ ...settings, dailyPanchangamReminder: value });
+              await scheduleDailyPanchangamReminder(value, 6, 0, language);
+            }}
+            trackColor={{ false: colors.surfaceAlt, true: '#25D366' }}
             thumbColor={colors.textPrimary}
           />
         </View>

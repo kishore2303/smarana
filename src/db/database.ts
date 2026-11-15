@@ -280,6 +280,7 @@ export function getAppSettings(): AppSettings {
   const rawMalaSize = map.get('malaSize');
   const rawMeruBehavior = map.get('meruBehavior');
   const rawMalaHaptic = map.get('malaHapticEnabled');
+  const rawDailyPanchanga = map.get('dailyPanchangamReminder');
 
   const sensitivity: BackTapSensitivity =
     rawSensitivity === 'low' ||
@@ -322,6 +323,10 @@ export function getAppSettings(): AppSettings {
       rawMalaHaptic === undefined
         ? DEFAULT_APP_SETTINGS.malaHapticEnabled
         : rawMalaHaptic === 'true',
+    dailyPanchangamReminder:
+      rawDailyPanchanga === undefined
+        ? DEFAULT_APP_SETTINGS.dailyPanchangamReminder
+        : rawDailyPanchanga === 'true',
   };
 }
 
@@ -361,6 +366,11 @@ export function saveAppSettings(settings: AppSettings): void {
     `INSERT INTO app_settings (key, value) VALUES ('malaHapticEnabled', ?)
      ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
     [String(settings.malaHapticEnabled)]
+  );
+  db.runSync(
+    `INSERT INTO app_settings (key, value) VALUES ('dailyPanchangamReminder', ?)
+     ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+    [String(settings.dailyPanchangamReminder)]
   );
 }
 

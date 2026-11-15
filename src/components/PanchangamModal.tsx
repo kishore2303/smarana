@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import {
+  Linking,
   Modal,
   Pressable,
   ScrollView,
@@ -21,6 +22,10 @@ import {
   SankalpaType,
   TraditionType,
 } from '../engine/panchangamEngine';
+import {
+  formatPanchangaWhatsAppMessage,
+  sharePanchangaWhatsApp,
+} from '../utils/panchangaShare';
 import { useLanguage } from '../i18n/LanguageContext';
 import { colors } from '../theme/colors';
 
@@ -118,6 +123,54 @@ export function PanchangamModal({ visible, onClose }: PanchangamModalProps) {
   const handleResetToToday = () => {
     Haptics.selectionAsync().catch(() => {});
     setActiveDate(new Date());
+  };
+
+  // Share Panchangam via WhatsApp (1-Tap)
+  const handleSharePanchangamWhatsApp = async () => {
+    Haptics.selectionAsync().catch(() => {});
+    await sharePanchangaWhatsApp(panchanga, language);
+  };
+
+  // Quick copy or fallback share for Panchangam
+  const handleCopyPanchangam = async () => {
+    Haptics.selectionAsync().catch(() => {});
+    const message = formatPanchangaWhatsAppMessage(panchanga, language);
+    try {
+      await Share.share({
+        message,
+        title: isTelugu ? 'నేటి తెలుగు పంచాంగం' : 'Daily Telugu Panchangam',
+      });
+      setCopyFeedback(true);
+      setTimeout(() => setCopyFeedback(false), 2500);
+    } catch {
+      // User dismissed
+    }
+  };
+
+  // Share Sankalpam via WhatsApp (1-Tap)
+  const handleShareSankalpamWhatsApp = async () => {
+    Haptics.selectionAsync().catch(() => {});
+    const textToShare = isTelugu
+      ? `🪷 *${sankalpa.telugu.title}*\n\n${sankalpa.telugu.fullText}\n\n*[${t.panchangam.bhavarthaTitle}]*\n${sankalpa.telugu.bhavartha}\n\n🙏 *స్మరణ (Smarana)*`
+      : `🪷 *${sankalpa.english.title}*\n\n${sankalpa.english.fullText}\n\n*[${t.panchangam.bhavarthaTitle}]*\n${sankalpa.english.bhavartha}\n\n🙏 *Shared via Smarana*`;
+
+    const whatsappUrl = `whatsapp://send?text=${encodeURIComponent(textToShare)}`;
+    try {
+      const canOpen = await Linking.canOpenURL(whatsappUrl);
+      if (canOpen) {
+        await Linking.openURL(whatsappUrl);
+        return;
+      }
+    } catch {
+      // Fallback
+    }
+
+    try {
+      await Share.share({
+        message: textToShare,
+        title: isTelugu ? sankalpa.telugu.title : sankalpa.english.title,
+      });
+    } catch {}
   };
 
   // Share / Copy Sankalpam
@@ -310,6 +363,37 @@ export function PanchangamModal({ visible, onClose }: PanchangamModalProps) {
             contentContainerStyle={styles.scrollContent}
             showsVerticalScrollIndicator={false}
           >
+            {/* 1-Tap WhatsApp Share Bar */}
+            <View style={styles.shareActionBar}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.whatsAppShareBtn,
+                  pressed && styles.whatsAppShareBtnPressed,
+                ]}
+                onPress={handleSharePanchangamWhatsApp}
+                accessibilityRole="button"
+                accessibilityLabel={t.panchangam.shareWhatsApp}
+              >
+                <TabIcon name="WhatsApp" color="#FFFFFF" size={17} />
+                <Text style={styles.whatsAppShareBtnText}>
+                  {t.panchangam.shareWhatsApp}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={styles.quickCopyBtn}
+                onPress={handleCopyPanchangam}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="Copy or Share"
+              >
+                <Text style={styles.quickCopyBtnText}>
+                  {copyFeedback
+                    ? (isTelugu ? '✓ కాపీ అయింది' : '✓ Copied')
+                    : (isTelugu ? '📋 కాపీ / ఇతర' : '📋 Copy / Other')}
+                </Text>
+              </Pressable>
+            </View>
+
             {/* Special Day Banner (Ekadashi, Pradosham, Pournami, etc.) */}
             {panchanga.specialDayNotes.telugu ? (
               <View style={styles.specialBanner}>
@@ -790,6 +874,21 @@ export function PanchangamModal({ visible, onClose }: PanchangamModalProps) {
 
             {/* Copy / Share Button */}
             <View style={styles.sankalpaActionRow}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.sankalpaWhatsAppBtn,
+                  pressed && styles.whatsAppShareBtnPressed,
+                ]}
+                onPress={handleShareSankalpamWhatsApp}
+                accessibilityRole="button"
+                accessibilityLabel={t.panchangam.shareSankalpamWhatsApp}
+              >
+                <TabIcon name="WhatsApp" color="#FFFFFF" size={17} />
+                <Text style={styles.whatsAppShareBtnText}>
+                  {t.panchangam.shareSankalpamWhatsApp}
+                </Text>
+              </Pressable>
+
               <Pressable
                 style={styles.shareBtn}
                 onPress={handleShareSankalpam}
@@ -1463,6 +1562,63 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     fontSize: 11,
     lineHeight: 16,
+  },
+
+  /* 1-Tap WhatsApp Share Bar Styles */
+  shareActionBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 12,
+  },
+  whatsAppShareBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#1EBE5D',
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(37, 211, 102, 0.4)',
+  },
+  whatsAppShareBtnPressed: {
+    opacity: 0.88,
+    transform: [{ scale: 0.98 }],
+  },
+  whatsAppShareBtnText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  quickCopyBtn: {
+    backgroundColor: colors.surfaceAlt,
+    borderColor: colors.border,
+    borderWidth: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  quickCopyBtnText: {
+    color: colors.goldSoft,
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  sankalpaWhatsAppBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    backgroundColor: '#1EBE5D',
+    paddingVertical: 12,
+    borderRadius: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(37, 211, 102, 0.4)',
   },
 
   /* Action Row */
