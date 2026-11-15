@@ -59,6 +59,7 @@ export interface AppSettings {
   malaSize: MalaSize;
   meruBehavior: MeruBehavior;
   malaHapticEnabled: boolean;
+  dailyPanchangamReminder: boolean;
 }
 
 export interface PracticeSession {
@@ -105,6 +106,7 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   malaSize: 108,
   meruBehavior: 'continue',
   malaHapticEnabled: true,
+  dailyPanchangamReminder: true,
 };
 
 export const JAPA_SUGGESTED_TARGETS = [11, 27, 54, 108, 1008] as const;

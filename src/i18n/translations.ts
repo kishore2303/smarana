@@ -45,6 +45,18 @@ export interface TranslationStrings {
     errorTemple: string;
     errorTarget: string;
     fallbackLabel: string;
+    autoLoopTitle: string;
+    autoLoopSubtitle: string;
+    manualMode: string;
+    autoLoopMode: string;
+    startCalibration: string;
+    completeCalibration: string;
+    calibratingHint: string;
+    calibratedBadge: string;
+    pocketHint: string;
+    stepsCount: string;
+    recalibrate: string;
+    minStepsWarning: string;
   };
   japa: {
     eyebrow: string;
@@ -168,6 +180,8 @@ export interface TranslationStrings {
     meruPauseHint: string;
     malaHapticTitle: string;
     malaHapticDesc: string;
+    dailyPanchangamReminder: string;
+    dailyPanchangamReminderHint: string;
     notesTitle: string;
     notesBody: string;
   };
@@ -189,6 +203,32 @@ export interface TranslationStrings {
     settingsDesc: string;
     aboutTitle: string;
     aboutDesc: string;
+    nityaPoojaTitle: string;
+    nityaPoojaDesc: string;
+  };
+  nityaPooja: {
+    cardBadge: string;
+    cardTitle: string;
+    cardDesc: string;
+    title: string;
+    subtitle: string;
+    modeLaghu: string;
+    modeShodasa: string;
+    modeLaghuHint: string;
+    modeShodasaHint: string;
+    stepCount: string;
+    actionTitle: string;
+    mantraTitle: string;
+    meaningTitle: string;
+    nextStep: string;
+    prevStep: string;
+    completePooja: string;
+    poojaCompletedTitle: string;
+    poojaCompletedDesc: string;
+    poojaDoneButton: string;
+    selectDeityPrompt: string;
+    ashtothramNamesCount: string;
+    changeDeity: string;
   };
   ashtothram: {
     badge: string;
@@ -266,12 +306,18 @@ export interface TranslationStrings {
     personalDetails: string;
     personalDetailsHint: string;
     calendarButton: string;
+    shareWhatsApp: string;
+    shareShort: string;
+    shareSankalpamWhatsApp: string;
+    shareSuccess: string;
   };
   notifications: {
     pradakshinaTitle: string;
     japaTitle: string;
     pradakshinaUnit: string;
     japaUnit: string;
+    panchangaReminderTitle: string;
+    panchangaReminderBody: string;
   };
 }
 
@@ -323,6 +369,18 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       errorTemple: 'Please enter the temple name.',
       errorTarget: 'Please enter a valid target of 1 or more.',
       fallbackLabel: 'Temple Pradakshina',
+      autoLoopTitle: 'Smart Auto-Loop',
+      autoLoopSubtitle: 'Walk 1st round to calibrate. Phone auto-counts remaining rounds in pocket.',
+      manualMode: 'Manual Tap',
+      autoLoopMode: 'Auto-Loop',
+      startCalibration: '🚶‍♂️ Start Round 1 (Calibrate)',
+      completeCalibration: '✅ Finish Round 1 · Set Loop',
+      calibratingHint: 'Walk Round 1 around the shrine. Tap "Finish Round 1" when back at start.',
+      calibratedBadge: 'Loop Calibrated',
+      pocketHint: 'Keep phone in pocket. Phone will vibrate on every completed round.',
+      stepsCount: 'steps',
+      recalibrate: 'Re-calibrate',
+      minStepsWarning: 'Please walk at least 10 steps before setting loop.',
     },
     japa: {
       eyebrow: 'MANTRA REPETITION',
@@ -463,12 +521,17 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       malaHapticTitle: 'Mala Completion Haptic',
       malaHapticDesc:
         'Play a gentle double-pulse vibration whenever a full Mala is completed.',
+      dailyPanchangamReminder: 'Daily Morning Panchangam (6:00 AM)',
+      dailyPanchangamReminderHint:
+        'Receive a gentle notification at 6:00 AM to view and share today\'s Panchangam on WhatsApp.',
       notesTitle: 'Android Background & Button Notes',
       notesBody:
         '• Back-tap detection currently runs while the app is open on screen.\n• Reliable locked-screen detection and hardware volume-button counting require a native Android build (Expo dev client) and foreground-service testing.',
     },
     menu: {
       menuTitle: 'Smarana Menu',
+      nityaPoojaTitle: 'Nitya Pooja Vidhanam',
+      nityaPoojaDesc: 'Step-by-step guided daily worship',
       ashtothramTitle: 'Ashtothram',
       ashtothramDesc: '108 sacred names for Archana & Japa',
       japaTitle: 'Japa Counter',
@@ -486,6 +549,32 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       aboutTitle: 'About Smarana',
       aboutDesc:
         'Offline-first, privacy-first companion for Japa, Pradakshina and daily Sadhana.',
+    },
+    nityaPooja: {
+      cardBadge: 'DAILY WORSHIP',
+      cardTitle: 'Nitya Pooja Vidhanam',
+      cardDesc:
+        'Step-by-step guided daily pooja from lamp lighting to Mangala Harati with slokas, actions, and meaning.',
+      title: 'Nitya Pooja Vidhanam',
+      subtitle: 'Daily Vedic Worship Procedure',
+      modeLaghu: 'Laghu Pooja (5 Mins)',
+      modeShodasa: 'Shodashopachara (16 Steps)',
+      modeLaghuHint: '11 essential steps for busy weekday mornings',
+      modeShodasaHint: 'Full 16 canonical upacharas for sacred days',
+      stepCount: 'Step',
+      actionTitle: 'Action (చేయవలసిన క్రియ)',
+      mantraTitle: 'Mantra / Sloka (శ్లోకం)',
+      meaningTitle: 'Sacred Meaning (భావార్థం)',
+      nextStep: 'Next Step (తదుపరి) →',
+      prevStep: '← Previous (వెనుకకు)',
+      completePooja: '🪷 Complete Pooja (సమర్పణ)',
+      poojaCompletedTitle: 'Pooja Sampoornam!',
+      poojaCompletedDesc:
+        'May the Divine bless you and your family with health, peace, and spiritual well-being.',
+      poojaDoneButton: 'Close & Return Home',
+      selectDeityPrompt: 'Select Deity for Pushparchana',
+      ashtothramNamesCount: '108 Divine Names',
+      changeDeity: 'Change Deity',
     },
     ashtothram: {
       badge: '108 DIVINE NAMES',
@@ -565,12 +654,19 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       personalDetails: 'Personal Gotram & Name',
       personalDetailsHint: 'Customize Sankalpam with your Gotra and Sharma',
       calendarButton: 'Ugadi Calendar',
+      shareWhatsApp: 'Share on WhatsApp',
+      shareShort: 'Share',
+      shareSankalpamWhatsApp: 'Share Sankalpam on WhatsApp',
+      shareSuccess: 'Opening WhatsApp...',
     },
     notifications: {
       pradakshinaTitle: 'Pradakshina Complete',
       japaTitle: 'Japa Complete',
       pradakshinaUnit: 'Pradakshinas',
       japaUnit: 'repetitions',
+      panchangaReminderTitle: "Today's Panchangam",
+      panchangaReminderBody:
+        "Today's Tithi, Nakshatra, and timings are ready. Tap to share with family on WhatsApp.",
     },
   },
   te: {
@@ -620,6 +716,18 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       errorTemple: 'దయచేసి ఆలయ పేరు నమోదు చేయండి.',
       errorTarget: 'దయచేసి 1 లేదా అంతకంటే ఎక్కువ సంఖ్యను నమోదు చేయండి.',
       fallbackLabel: 'ఆలయ ప్రదక్షిణ',
+      autoLoopTitle: 'స్మార్ట్ ఆటో-లూప్',
+      autoLoopSubtitle: 'మొదటి రౌండ్ పూర్తి చేసి లూప్ సెట్ చేయండి. మిగిలినవి జేబులో ఉంచినా యాప్ ఆటోమేటిక్‌గా లెక్కిస్తుంది.',
+      manualMode: 'సాధారణ ట్యాప్',
+      autoLoopMode: 'స్మార్ట్ ఆటో-లూప్',
+      startCalibration: '🚶‍♂️ మొదటి రౌండ్ ప్రారంభించు',
+      completeCalibration: '✅ రౌండ్ 1 పూర్తయింది · లూప్ సెట్ చేయి',
+      calibratingHint: 'గర్భగుడి చుట్టూ 1వ రౌండ్ నడవండి. ప్రారంభ స్థానానికి రాగానే "రౌండ్ 1 పూర్తయింది" నొక్కండి.',
+      calibratedBadge: 'లూప్ నమోదైంది',
+      pocketHint: 'ఫోన్ జేబులో ఉంచుకోండి. ప్రతి రౌండ్ పూర్తికాగానే వైబ్రేషన్ వస్తుంది.',
+      stepsCount: 'అడుగులు',
+      recalibrate: 'మళ్లీ సెట్ చేయి',
+      minStepsWarning: 'దయచేసి కనీసం 10 అడుగులు నడిచిన తర్వాత లూప్ సెట్ చేయండి.',
     },
     japa: {
       eyebrow: 'మంత్ర జపం',
@@ -760,12 +868,17 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       malaHapticTitle: 'మాల పూర్తయినప్పుడు హ్యాప్టిక్',
       malaHapticDesc:
         'ఒక మాల పూర్తయినప్పుడు సున్నితమైన డబుల్-పల్స్ వైబ్రేషన్ ఇస్తుంది.',
+      dailyPanchangamReminder: 'దినసరి ఉదయ పంచాంగం (6:00 AM)',
+      dailyPanchangamReminderHint:
+        'రోజూ ఉదయం 6:00 గంటలకు పంచాంగాన్ని వీక్షించడానికి మరియు వాట్సాప్‌లో షేర్ చేయడానికి గుర్తుచేస్తుంది.',
       notesTitle: 'ఆండ్రాయిడ్ బ్యాక్‌గ్రౌండ్ & బటన్ వివరాలు',
       notesBody:
         '• ప్రస్తుతం యాప్ స్క్రీన్‌పై తెరిచి ఉన్నప్పుడు బ్యాక్-ట్యాప్ పనిచేస్తుంది.\n• స్క్రీన్ లాక్‌లో మరియు వాల్యూమ్ బటన్ కౌంటింగ్ కోసం నేటివ్ ఆండ్రాయిడ్ బిల్డ్ అవసరం.',
     },
     menu: {
       menuTitle: 'స్మరణ మెనూ',
+      nityaPoojaTitle: 'నిత్య పూజా విధానం',
+      nityaPoojaDesc: 'దశలవారీగా చేయవలసిన దిన పూజా పద్ధతి',
       ashtothramTitle: 'అష్టోత్తర శతనామావళి',
       ashtothramDesc: 'అర్చన మరియు జపానికి 108 నామాలు',
       japaTitle: 'జప కౌంటర్',
@@ -783,6 +896,32 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       aboutTitle: 'స్మరణ గురించి',
       aboutDesc:
         'జపం, ప్రదక్షిణ మరియు నిత్య సాధనకు ఆఫ్‌లైన్, గోప్యమైన సాధన సహచరి.',
+    },
+    nityaPooja: {
+      cardBadge: 'నిత్య పూజా విధానం',
+      cardTitle: 'నిత్య పూజా విధానం',
+      cardDesc:
+        'దీపారాధన నుండి హారతి వరకు వరుసగా చేయవలసిన క్రియలు, శ్లోకాలు, మరియు భావార్థాలతో కూడిన పూజా మార్గదర్శిని.',
+      title: 'నిత్య పూజా విధానం',
+      subtitle: 'ఆంధ్ర సంప్రదాయ దిన పూజా పద్ధతి',
+      modeLaghu: 'లఘు పూజ (5 ని॥)',
+      modeShodasa: 'షోడశోపచార పూజ (16 ఉపచారాలు)',
+      modeLaghuHint: 'రోజువారీ ఉదయపు సమయానికి 11 ముఖ్యమైన ఉపచారాలు',
+      modeShodasaHint: 'విశేష పర్వదినాలు & శుక్రవారాలకు సంపూర్ణ 16 ఉపచారాలు',
+      stepCount: 'క్రమం',
+      actionTitle: 'చేయవలసిన క్రియ',
+      mantraTitle: 'శ్లోకం / మంత్రం',
+      meaningTitle: 'భావార్థం',
+      nextStep: 'తదుపరి క్రియ →',
+      prevStep: '← వెనుకకు',
+      completePooja: '🪷 పూజ సంపూర్ణం (సమర్పణ)',
+      poojaCompletedTitle: 'పూజ సంపూర్ణమయింది!',
+      poojaCompletedDesc:
+        'భగవదనుగ్రహం మీ కుటుంబానికి ఆయురారోగ్య ఐశ్వర్యాలు మరియు ప్రశాంతతను ప్రసాదించుగాక.',
+      poojaDoneButton: 'ముగించి హోమ్‌కు వెళ్ళు',
+      selectDeityPrompt: 'పుష్పార్చనకు ఇష్టదేవతను ఎంచుకోండి',
+      ashtothramNamesCount: '108 దివ్య నామాలు',
+      changeDeity: 'దేవతను మార్చు',
     },
     ashtothram: {
       badge: '108 దివ్య నామాలు',
@@ -862,12 +1001,19 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       personalDetails: 'గోత్ర నామాలు (ఐచ్ఛికం)',
       personalDetailsHint: 'మీ గోత్రం మరియు పేరుతో సంకల్పాన్ని తయారుచేయండి',
       calendarButton: 'ఉగాది క్యాలెండర్',
+      shareWhatsApp: 'వాట్సాప్‌లో పంచాంగం షేర్ చేయండి',
+      shareShort: 'షేర్',
+      shareSankalpamWhatsApp: 'సంకల్పాన్ని వాట్సాప్‌లో షేర్ చేయండి',
+      shareSuccess: 'వాట్సాప్ తెరుస్తోంది...',
     },
     notifications: {
       pradakshinaTitle: 'ప్రదక్షిణ పూర్తయింది',
       japaTitle: 'జపం పూర్తయింది',
       pradakshinaUnit: 'ప్రదక్షిణలు',
       japaUnit: 'సార్లు',
+      panchangaReminderTitle: 'నేటి పంచాంగం సిద్ధంగా ఉంది',
+      panchangaReminderBody:
+        'నేటి తిథి, నక్షత్రం మరియు శుభ సమయాలను వాట్సాప్‌లో కుటుంబంతో షేర్ చేయండి.',
     },
   },
 };

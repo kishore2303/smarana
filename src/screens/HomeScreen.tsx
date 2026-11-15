@@ -2,6 +2,7 @@ import React, { useCallback, useState } from 'react';
 import {
   Image,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -16,6 +17,7 @@ import { getPracticeStats } from '../db/database';
 import { useLanguage } from '../i18n/LanguageContext';
 import { useAppMenu } from '../navigation/MenuContext';
 import { RootTabParamList } from '../navigation/types';
+import { sharePanchangaWhatsApp } from '../utils/panchangaShare';
 import { colors } from '../theme/colors';
 import { radii, spacing } from '../theme/tokens';
 import type { PracticeStats } from '../types/practice';
@@ -32,7 +34,7 @@ const PREVIEW_DEITY_IDS = [
 export function HomeScreen({ navigation }: Props) {
   const insets = useSafeAreaInsets();
   const { language, t } = useLanguage();
-  const { openAshtothram, openPanchangam } = useAppMenu();
+  const { openAshtothram, openPanchangam, openNityaPooja } = useAppMenu();
   const isTelugu = language === 'te';
 
   const todayPanchanga = getPanchanga();
@@ -56,15 +58,21 @@ export function HomeScreen({ navigation }: Props) {
     }, [])
   );
 
+  const handleQuickWhatsAppShare = async () => {
+    await sharePanchangaWhatsApp(todayPanchanga, language);
+  };
+
   return (
-    <View
-      style={[
+    <ScrollView
+      style={styles.screenWrapper}
+      contentContainerStyle={[
         styles.container,
         {
           paddingTop: Math.max(insets.top, 16) + 4,
           paddingBottom: Math.max(insets.bottom, 16) + 8,
         },
       ]}
+      showsVerticalScrollIndicator={false}
     >
       {/* a. Panchangam Card (Prominent Top Feature) */}
       <Pressable
@@ -85,10 +93,27 @@ export function HomeScreen({ navigation }: Props) {
                 : `Sri ${todayPanchanga.samvatsara.english} · ${todayPanchanga.masa.english}`}
             </Text>
           </View>
-          <View style={styles.panchangaTodayPill}>
-            <Text style={styles.panchangaTodayPillText}>
-              {t.panchangam.today}
-            </Text>
+          <View style={styles.panchangaTopRight}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.panchangaWhatsAppBtn,
+                pressed && styles.panchangaWhatsAppBtnPressed,
+              ]}
+              onPress={handleQuickWhatsAppShare}
+              hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={t.panchangam.shareWhatsApp}
+            >
+              <TabIcon name="WhatsApp" color="#25D366" size={13} />
+              <Text style={styles.panchangaWhatsAppText}>
+                {t.panchangam.shareShort}
+              </Text>
+            </Pressable>
+            <View style={styles.panchangaTodayPill}>
+              <Text style={styles.panchangaTodayPillText}>
+                {t.panchangam.today}
+              </Text>
+            </View>
           </View>
         </View>
 
@@ -112,7 +137,52 @@ export function HomeScreen({ navigation }: Props) {
         </View>
       </Pressable>
 
-      {/* b. Ashtottara Shatanamavali Card */}
+      {/* b. Nitya Pooja Vidhanam Card */}
+      <Pressable
+        style={({ pressed }) => [
+          styles.poojaCard,
+          pressed && styles.cardPressed,
+        ]}
+        onPress={openNityaPooja}
+        accessibilityRole="button"
+        accessibilityLabel={t.nityaPooja.cardTitle}
+      >
+        <View style={styles.poojaTopRow}>
+          <View style={styles.badgeRow}>
+            <TabIcon name="Pooja" color={colors.gold} size={15} />
+            <Text style={styles.poojaBadge}>
+              {t.nityaPooja.cardBadge}
+            </Text>
+          </View>
+          <View style={styles.poojaStepPill}>
+            <Text style={styles.poojaStepPillText}>
+              {isTelugu ? '16 ఉపచారాలు · 5 ని॥' : '16 Steps · 5 Mins'}
+            </Text>
+          </View>
+        </View>
+
+        <Text style={styles.poojaTitle}>
+          {t.nityaPooja.cardTitle}
+        </Text>
+        <Text style={styles.poojaSubtitle} numberOfLines={1}>
+          {t.nityaPooja.cardDesc}
+        </Text>
+
+        <View style={styles.poojaBottomRow}>
+          <Text style={styles.poojaStepsHint} numberOfLines={1}>
+            {isTelugu
+              ? 'దీపారాధన · ఆచమనం · సంకల్పం · నైవేద్యం · హారతి'
+              : 'Deepam · Achamanam · Sankalpam · Naivedyam · Harati'}
+          </Text>
+          <View style={styles.poojaActionPill}>
+            <Text style={styles.poojaActionText}>
+              {t.home.startPractice} →
+            </Text>
+          </View>
+        </View>
+      </Pressable>
+
+      {/* c. Ashtottara Shatanamavali Card */}
       <Pressable
         style={({ pressed }) => [
           styles.ashtothramCard,
@@ -247,16 +317,21 @@ export function HomeScreen({ navigation }: Props) {
 
         <Text style={styles.todayChevron}>›</Text>
       </Pressable>
-    </View>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  screenWrapper: {
     flex: 1,
+    backgroundColor: colors.background,
+  },
+  container: {
+    flexGrow: 1,
     backgroundColor: colors.background,
     paddingHorizontal: spacing.lg,
     justifyContent: 'space-between',
+    gap: 8,
   },
 
   /* a. Panchangam Card */
@@ -284,6 +359,31 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.8,
+  },
+  panchangaTopRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  panchangaWhatsAppBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(37, 211, 102, 0.12)',
+    borderColor: 'rgba(37, 211, 102, 0.5)',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 7,
+    paddingVertical: 2.5,
+  },
+  panchangaWhatsAppBtnPressed: {
+    backgroundColor: 'rgba(37, 211, 102, 0.28)',
+    transform: [{ scale: 0.96 }],
+  },
+  panchangaWhatsAppText: {
+    color: '#25D366',
+    fontSize: 10,
+    fontWeight: '700',
   },
   panchangaTodayPill: {
     backgroundColor: 'rgba(212, 175, 55, 0.15)',
@@ -330,7 +430,79 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
 
-  /* b. Featured Ashtothram Card */
+  /* b. Nitya Pooja Vidhanam Card */
+  poojaCard: {
+    backgroundColor: '#112219',
+    borderColor: 'rgba(212, 175, 55, 0.55)',
+    borderWidth: 1,
+    borderRadius: 16,
+    padding: 13,
+  },
+  poojaTopRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+  },
+  poojaBadge: {
+    color: colors.gold,
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  poojaStepPill: {
+    backgroundColor: 'rgba(212, 175, 55, 0.15)',
+    borderColor: colors.goldSoft,
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  poojaStepPillText: {
+    color: colors.gold,
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  poojaTitle: {
+    color: colors.ivoryWarm,
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 2,
+  },
+  poojaSubtitle: {
+    color: colors.textSecondary,
+    fontSize: 11,
+    lineHeight: 15,
+    marginBottom: 6,
+  },
+  poojaBottomRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 8,
+  },
+  poojaStepsHint: {
+    color: colors.goldSoft,
+    fontSize: 10,
+    fontWeight: '600',
+    flex: 1,
+  },
+  poojaActionPill: {
+    backgroundColor: colors.surface,
+    borderColor: colors.gold,
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+  },
+  poojaActionText: {
+    color: colors.goldSoft,
+    fontSize: 10,
+    fontWeight: '700',
+  },
+
+  /* c. Featured Ashtothram Card */
   ashtothramCard: {
     backgroundColor: '#0F261E',
     borderColor: colors.gold,
