@@ -172,7 +172,11 @@ export function CountdownCounter({
     const result = pradakshinaLoop.completeCalibration();
     if (!result.success) {
       if (result.error === 'TOO_FEW_STEPS') {
-        Alert.alert(t.pradakshina.autoLoopTitle, t.pradakshina.minStepsWarning);
+        const errorMsg =
+          language === 'te'
+            ? `కేవలం ${pradakshinaLoop.currentLapSteps} అడుగులు మాత్రమే నమోదయ్యాయి. దయచేసి గర్భగుడి చుట్టూ కనీసం 8 అడుగులు నడవండి, లేదా [+] బటన్‌తో మీ అడుగుల సంఖ్యను సరిచేయండి.`
+            : `Only ${pradakshinaLoop.currentLapSteps} steps detected. Please walk at least 8 steps around the shrine, or use the [+] button to set your steps manually.`;
+        Alert.alert(t.pradakshina.autoLoopTitle, errorMsg);
       }
     }
   };
@@ -821,9 +825,29 @@ export function CountdownCounter({
           ) : pradakshinaLoop.phase === 'CALIBRATING' ? (
             <View style={styles.calibratingCard}>
               <View style={styles.calibratingHeaderRow}>
-                <Text style={styles.calibratingStepsText}>
-                  👣 {pradakshinaLoop.currentLapSteps} {t.pradakshina.stepsCount}
-                </Text>
+                <View style={styles.stepAdjustRow}>
+                  <Pressable
+                    style={styles.stepAdjustBtn}
+                    onPress={() => pradakshinaLoop.adjustSteps(-1)}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel="Decrease steps"
+                  >
+                    <Text style={styles.stepAdjustBtnText}>−</Text>
+                  </Pressable>
+                  <Text style={styles.calibratingStepsText}>
+                    👣 {pradakshinaLoop.currentLapSteps} {t.pradakshina.stepsCount}
+                  </Text>
+                  <Pressable
+                    style={styles.stepAdjustBtn}
+                    onPress={() => pradakshinaLoop.adjustSteps(1)}
+                    hitSlop={8}
+                    accessibilityRole="button"
+                    accessibilityLabel="Increase steps"
+                  >
+                    <Text style={styles.stepAdjustBtnText}>+</Text>
+                  </Pressable>
+                </View>
                 <View style={styles.calibratingPill}>
                   <Text style={styles.calibratingPillText}>Round 1</Text>
                 </View>
@@ -1147,6 +1171,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  stepAdjustRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  stepAdjustBtn: {
+    backgroundColor: colors.surfaceAlt,
+    borderColor: colors.goldSoft,
+    borderWidth: 1,
+    borderRadius: 8,
+    width: 28,
+    height: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  stepAdjustBtnText: {
+    color: colors.gold,
+    fontSize: 16,
+    fontWeight: '800',
+    lineHeight: 18,
   },
   calibratingStepsText: {
     color: colors.textPrimary,
