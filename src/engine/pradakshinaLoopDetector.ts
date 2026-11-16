@@ -30,17 +30,26 @@ export interface CalibrationResult {
 
 const GRAVITY_ALPHA = 0.90;
 const MIN_CALIBRATION_STEPS = 8;
-const PEAK_DEVIATION_G = 0.04;
-const VALLEY_DEVIATION_G = -0.03;
-const MIN_STEP_INTERVAL_MS = 240;
+const PEAK_DEVIATION_G = 0.14; // Foot strike impulse threshold
+const VALLEY_DEVIATION_G = -0.10; // Ground rebound threshold
+const MIN_SWING_G = 0.24; // Peak-to-valley swing required to reject few-inch hand motions
+const MIN_STEP_INTERVAL_MS = 360; // Max 2.7 steps/sec human cadence
+const MIN_LOOP_ROTATION_DEG = 280; // Minimum circular circuit rotation required for a closed loop
 
 export class PradakshinaLoopDetector {
   private phase: PradakshinaPhase = 'IDLE';
   private gravityMag = 1.0;
   private hasSeenPeak = false;
+  private peakMag = 0;
   private lastStepTimeMs = 0;
   private calibrationStartMs = 0;
   private lapStartMs = 0;
+
+  // Heading & loop circuit tracking
+  private startHeadingDeg: number | null = null;
+  private prevHeadingDeg: number | null = null;
+  private accumulatedRotationDeg = 0;
+  private hasCompass = false;
 
   private currentLapSteps = 0;
   private completedLaps = 0;
@@ -69,11 +78,39 @@ export class PradakshinaLoopDetector {
     return this.completedLaps;
   }
 
+  getAccumulatedRotationDeg(): number {
+    return this.accumulatedRotationDeg;
+  }
+
+  isCompassActive(): boolean {
+    return this.hasCompass;
+  }
+
   getLapProgress(): number {
     if (!this.profile || this.profile.baselineSteps === 0) {
       return 0;
     }
     return Math.min(1.0, this.currentLapSteps / this.profile.baselineSteps);
+  }
+
+  /**
+   * Update device magnetic heading (in degrees: 0° to 360°).
+   * Tracks continuous angular traversal to verify that the devotee actually
+   * completed a 360° closed circuit around the shrine rather than walking straight or roaming.
+   */
+  updateHeading(headingDeg: number): void {
+    this.hasCompass = true;
+    if (this.startHeadingDeg === null || this.prevHeadingDeg === null) {
+      this.startHeadingDeg = headingDeg;
+      this.prevHeadingDeg = headingDeg;
+      this.accumulatedRotationDeg = 0;
+      return;
+    }
+
+    // Shortest angular difference between consecutive heading samples (-180° to +180°)
+    const diff = ((headingDeg - this.prevHeadingDeg + 540) % 360) - 180;
+    this.prevHeadingDeg = headingDeg;
+    this.accumulatedRotationDeg += diff;
   }
 
   /**
@@ -87,7 +124,11 @@ export class PradakshinaLoopDetector {
     this.lapStartMs = nowMs;
     this.lastStepTimeMs = 0; // 0 permits immediate first step detection without lockout
     this.hasSeenPeak = false;
+    this.peakMag = 0;
     this.gravityMag = 1.0;
+    this.startHeadingDeg = null;
+    this.prevHeadingDeg = null;
+    this.accumulatedRotationDeg = 0;
     this.profile = null;
   }
 
@@ -133,6 +174,9 @@ export class PradakshinaLoopDetector {
     this.phase = 'TRACKING';
     this.completedLaps = 1; // Round 1 is officially completed!
     this.currentLapSteps = 0;
+    this.accumulatedRotationDeg = 0;
+    this.prevHeadingDeg = null;
+    this.startHeadingDeg = null;
     this.lapStartMs = nowMs;
 
     return {
@@ -157,10 +201,18 @@ export class PradakshinaLoopDetector {
           this.currentLapSteps >= this.profile.minStepsPerLap &&
           timeInLapMs >= this.profile.baselineDurationMs * 0.82;
 
-        if (reachedBaseline || reachedMinStepsWithTime) {
+        // If compass is active, verify that a closed 360° circular traversal was completed
+        const reachedClosedLoop =
+          !this.hasCompass ||
+          Math.abs(this.accumulatedRotationDeg) >= MIN_LOOP_ROTATION_DEG;
+
+        if ((reachedBaseline || reachedMinStepsWithTime) && reachedClosedLoop) {
           lapDetected = true;
           this.completedLaps++;
           this.currentLapSteps = 0;
+          this.accumulatedRotationDeg = 0;
+          this.prevHeadingDeg = null;
+          this.startHeadingDeg = null;
           this.lapStartMs = nowMs;
           break; // Lap triggered
         }
@@ -179,8 +231,9 @@ export class PradakshinaLoopDetector {
 
   /**
    * Process an accelerometer sample to detect human walking steps.
-   * Uses dynamic gravity tracking and deviation thresholds for sensitive
-   * detection of gentle, mindful temple walking without timeouts.
+   * Enforces realistic walking biomechanics: requires a dynamic peak (+0.14g),
+   * a ground rebound valley (-0.10g), and a minimum total swing of 0.24g,
+   * completely rejecting hand motions and micro-movements of a few inches.
    */
   updateAccelerometer(
     sample: Vector3D,
@@ -201,12 +254,16 @@ export class PradakshinaLoopDetector {
     // Detect walking step: positive impulse (peak) followed by rebound (valley)
     if (deviation >= PEAK_DEVIATION_G) {
       this.hasSeenPeak = true;
+      this.peakMag = Math.max(this.peakMag, rawMag);
     } else if (this.hasSeenPeak && deviation <= VALLEY_DEVIATION_G) {
-      if (timeSinceLastStep >= MIN_STEP_INTERVAL_MS) {
+      const swing = this.peakMag - rawMag;
+      // Require genuine full-body walking swing (>= 0.24g) and cadence interval
+      if (swing >= MIN_SWING_G && timeSinceLastStep >= MIN_STEP_INTERVAL_MS) {
         stepDetected = true;
         this.lastStepTimeMs = nowMs;
       }
       this.hasSeenPeak = false;
+      this.peakMag = 0;
     }
 
     if (stepDetected) {
@@ -227,9 +284,13 @@ export class PradakshinaLoopDetector {
     this.phase = 'IDLE';
     this.gravityMag = 1.0;
     this.hasSeenPeak = false;
+    this.peakMag = 0;
     this.lastStepTimeMs = 0;
     this.calibrationStartMs = 0;
     this.lapStartMs = 0;
+    this.startHeadingDeg = null;
+    this.prevHeadingDeg = null;
+    this.accumulatedRotationDeg = 0;
     this.currentLapSteps = 0;
     this.completedLaps = 0;
     this.profile = null;

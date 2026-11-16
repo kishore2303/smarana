@@ -81,21 +81,35 @@ test('PradakshinaLoopDetector - detects steps from accelerometer sinusoidal walk
   assert.equal(result.profile?.baselineSteps, 12);
 });
 
-test('PradakshinaLoopDetector - handles delayed start and gentle temple walking without lockout', () => {
+test('PradakshinaLoopDetector - rejects micro-movements and few-inch hand motions', () => {
+  const detector = new PradakshinaLoopDetector();
+  detector.startCalibration(1000);
+
+  // Simulate hand moving a few inches (subtle sway: peak 1.05g, valley 0.95g, swing 0.10g)
+  for (let t = 2000; t <= 10000; t += 200) {
+    detector.updateAccelerometer({ x: 0.02, y: 0.03, z: 1.05 }, t);
+    detector.updateAccelerometer({ x: 0.02, y: 0.03, z: 0.95 }, t + 100);
+  }
+
+  // Must reject all few-inch hand tremors: 0 steps!
+  assert.equal(detector.getCurrentLapSteps(), 0);
+});
+
+test('PradakshinaLoopDetector - handles delayed start and genuine walking without lockout', () => {
   const detector = new PradakshinaLoopDetector();
   detector.startCalibration(1000);
 
   // User waits 5 seconds before taking first step
   let nowMs = 6000;
-  // Walk 15 gentle footsteps: small peak (1.06g) and small valley (0.95g)
+  // Walk 15 genuine footsteps: peak 1.24g, valley 0.86g, swing 0.38g
   for (let step = 0; step < 15; step++) {
-    detector.updateAccelerometer({ x: 0.05, y: 0.1, z: 1.06 }, nowMs);
+    detector.updateAccelerometer({ x: 0.08, y: 0.12, z: 1.24 }, nowMs);
     nowMs += 200;
-    detector.updateAccelerometer({ x: 0.05, y: 0.1, z: 0.95 }, nowMs);
-    nowMs += 450; // total 650ms per step
+    detector.updateAccelerometer({ x: 0.05, y: 0.08, z: 0.86 }, nowMs);
+    nowMs += 400; // total 600ms per step
   }
 
-  // Steps should be detected despite delayed start and gentle movements
+  // Steps should be detected despite delayed start
   assert.ok(detector.getCurrentLapSteps() >= 14, `Expected at least 14 steps, got ${detector.getCurrentLapSteps()}`);
 
   // Test manual step adjustment
@@ -107,9 +121,9 @@ test('PradakshinaLoopDetector - handles delayed start and gentle temple walking 
   // Pausing in middle: pause 8 seconds
   nowMs += 8000;
   for (let step = 0; step < 5; step++) {
-    detector.updateAccelerometer({ x: 0.05, y: 0.1, z: 1.08 }, nowMs);
+    detector.updateAccelerometer({ x: 0.08, y: 0.12, z: 1.22 }, nowMs);
     nowMs += 200;
-    detector.updateAccelerometer({ x: 0.05, y: 0.1, z: 0.94 }, nowMs);
+    detector.updateAccelerometer({ x: 0.05, y: 0.08, z: 0.88 }, nowMs);
     nowMs += 400;
   }
   assert.ok(detector.getCurrentLapSteps() >= 20);
@@ -117,6 +131,50 @@ test('PradakshinaLoopDetector - handles delayed start and gentle temple walking 
   // Calibration succeeds
   const calResult = detector.completeCalibration(nowMs);
   assert.equal(calResult.success, true);
+});
+
+test('PradakshinaLoopDetector - compass heading enforces closed 360 loop and rejects straight walking', () => {
+  const detector = new PradakshinaLoopDetector();
+  detector.startCalibration(1000);
+
+  // Calibrate 25 steps in a circle
+  let nowMs = 2000;
+  for (let s = 0; s < 25; s++) {
+    detector.updateHeading((s * 15) % 360);
+    detector.updateAccelerometer({ x: 0.1, y: 0.1, z: 1.25 }, nowMs);
+    nowMs += 200;
+    detector.updateAccelerometer({ x: 0.1, y: 0.1, z: 0.85 }, nowMs);
+    nowMs += 350;
+  }
+  detector.completeCalibration(nowMs);
+  assert.equal(detector.getCompletedLaps(), 1);
+
+  // Walk 30 steps in a STRAIGHT line (heading 0 deg, no circular loop)
+  let straightLaps = 0;
+  for (let s = 0; s < 30; s++) {
+    detector.updateHeading(0); // Straight line!
+    const res1 = detector.updateAccelerometer({ x: 0.1, y: 0.1, z: 1.25 }, nowMs);
+    nowMs += 200;
+    const res2 = detector.updateAccelerometer({ x: 0.1, y: 0.1, z: 0.85 }, nowMs);
+    nowMs += 350;
+    if (res1.lapDetected || res2.lapDetected) straightLaps++;
+  }
+  // Straight line walking MUST NOT trigger a completed pradakshina round!
+  assert.equal(straightLaps, 0);
+
+  // Now walk a TRUE 360 degree circular loop around the shrine
+  let circleLaps = 0;
+  for (let s = 0; s < 25; s++) {
+    detector.updateHeading((s * 15) % 360); // Turning 360 degrees
+    const res1 = detector.updateAccelerometer({ x: 0.1, y: 0.1, z: 1.25 }, nowMs);
+    nowMs += 200;
+    const res2 = detector.updateAccelerometer({ x: 0.1, y: 0.1, z: 0.85 }, nowMs);
+    nowMs += 350;
+    if (res1.lapDetected || res2.lapDetected) circleLaps++;
+  }
+  // True circular loop triggers the completed lap!
+  assert.equal(circleLaps, 1);
+  assert.equal(detector.getCompletedLaps(), 2);
 });
 
 test('PradakshinaLoopDetector - supports reset', () => {
