@@ -49,6 +49,11 @@ export function usePradakshinaLoop({
       setLapProgress(event.lapProgress);
       setCompletedLaps(event.completedLaps);
 
+      if (event.stepDetected && detectorRef.current.getPhase() === 'CALIBRATING') {
+        // Subtle tick indicating step counted
+        void Haptics.selectionAsync().catch(() => {});
+      }
+
       if (event.lapDetected) {
         triggerLapFeedback();
         onLapDetectedRef.current();
@@ -56,6 +61,19 @@ export function usePradakshinaLoop({
     },
     [triggerLapFeedback]
   );
+
+  const adjustSteps = useCallback((delta: number) => {
+    const updated = detectorRef.current.adjustSteps(delta);
+    setCurrentLapSteps(updated);
+    setLapProgress(detectorRef.current.getLapProgress());
+    void Haptics.selectionAsync().catch(() => {});
+  }, []);
+
+  const setSteps = useCallback((steps: number) => {
+    detectorRef.current.setSteps(steps);
+    setCurrentLapSteps(steps);
+    setLapProgress(detectorRef.current.getLapProgress());
+  }, []);
 
   const startCalibration = useCallback(() => {
     detectorRef.current.startCalibration();
@@ -121,6 +139,8 @@ export function usePradakshinaLoop({
     completedLaps,
     startCalibration,
     completeCalibration,
+    adjustSteps,
+    setSteps,
     reset,
   };
 }

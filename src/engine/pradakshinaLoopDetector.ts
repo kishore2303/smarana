@@ -14,6 +14,7 @@ export interface PradakshinaLoopProfile {
 }
 
 export interface PradakshinaLapEvent {
+  stepDetected: boolean;
   lapDetected: boolean;
   completedLaps: number;
   currentLapSteps: number;
@@ -27,12 +28,11 @@ export interface CalibrationResult {
   error?: 'TOO_FEW_STEPS' | 'NOT_CALIBRATING';
 }
 
-const GRAVITY_ALPHA = 0.92;
-const MIN_CALIBRATION_STEPS = 10;
-const STEP_PEAK_THRESHOLD_G = 1.12;
-const STEP_VALLEY_THRESHOLD_G = 0.91;
-const MIN_STEP_INTERVAL_MS = 280;
-const MAX_STEP_INTERVAL_MS = 2500;
+const GRAVITY_ALPHA = 0.90;
+const MIN_CALIBRATION_STEPS = 8;
+const PEAK_DEVIATION_G = 0.04;
+const VALLEY_DEVIATION_G = -0.03;
+const MIN_STEP_INTERVAL_MS = 240;
 
 export class PradakshinaLoopDetector {
   private phase: PradakshinaPhase = 'IDLE';
@@ -85,9 +85,25 @@ export class PradakshinaLoopDetector {
     this.completedLaps = 0;
     this.calibrationStartMs = nowMs;
     this.lapStartMs = nowMs;
-    this.lastStepTimeMs = nowMs;
+    this.lastStepTimeMs = 0; // 0 permits immediate first step detection without lockout
     this.hasSeenPeak = false;
+    this.gravityMag = 1.0;
     this.profile = null;
+  }
+
+  /**
+   * Adjust steps manually (e.g. from +/- buttons during calibration).
+   */
+  adjustSteps(delta: number): number {
+    this.currentLapSteps = Math.max(0, this.currentLapSteps + delta);
+    return this.currentLapSteps;
+  }
+
+  /**
+   * Set steps count directly.
+   */
+  setSteps(steps: number): void {
+    this.currentLapSteps = Math.max(0, steps);
   }
 
   /**
@@ -152,6 +168,7 @@ export class PradakshinaLoopDetector {
     }
 
     return {
+      stepDetected: stepCount > 0,
       lapDetected,
       completedLaps: this.completedLaps,
       currentLapSteps: this.currentLapSteps,
@@ -162,6 +179,8 @@ export class PradakshinaLoopDetector {
 
   /**
    * Process an accelerometer sample to detect human walking steps.
+   * Uses dynamic gravity tracking and deviation thresholds for sensitive
+   * detection of gentle, mindful temple walking without timeouts.
    */
   updateAccelerometer(
     sample: Vector3D,
@@ -171,20 +190,19 @@ export class PradakshinaLoopDetector {
       sample.x * sample.x + sample.y * sample.y + sample.z * sample.z
     );
 
-    // Track dynamic gravity
+    // Track dynamic baseline gravity with low-pass filter
     this.gravityMag = GRAVITY_ALPHA * this.gravityMag + (1 - GRAVITY_ALPHA) * rawMag;
+    const deviation = rawMag - this.gravityMag;
 
     let stepDetected = false;
-    const timeSinceLastStep = nowMs - this.lastStepTimeMs;
+    const timeSinceLastStep =
+      this.lastStepTimeMs === 0 ? Infinity : nowMs - this.lastStepTimeMs;
 
-    // Walking peak detection
-    if (rawMag >= STEP_PEAK_THRESHOLD_G) {
+    // Detect walking step: positive impulse (peak) followed by rebound (valley)
+    if (deviation >= PEAK_DEVIATION_G) {
       this.hasSeenPeak = true;
-    } else if (this.hasSeenPeak && rawMag <= STEP_VALLEY_THRESHOLD_G) {
-      if (
-        timeSinceLastStep >= MIN_STEP_INTERVAL_MS &&
-        timeSinceLastStep <= MAX_STEP_INTERVAL_MS
-      ) {
+    } else if (this.hasSeenPeak && deviation <= VALLEY_DEVIATION_G) {
+      if (timeSinceLastStep >= MIN_STEP_INTERVAL_MS) {
         stepDetected = true;
         this.lastStepTimeMs = nowMs;
       }
@@ -196,6 +214,7 @@ export class PradakshinaLoopDetector {
     }
 
     return {
+      stepDetected: false,
       lapDetected: false,
       completedLaps: this.completedLaps,
       currentLapSteps: this.currentLapSteps,

@@ -81,6 +81,44 @@ test('PradakshinaLoopDetector - detects steps from accelerometer sinusoidal walk
   assert.equal(result.profile?.baselineSteps, 12);
 });
 
+test('PradakshinaLoopDetector - handles delayed start and gentle temple walking without lockout', () => {
+  const detector = new PradakshinaLoopDetector();
+  detector.startCalibration(1000);
+
+  // User waits 5 seconds before taking first step
+  let nowMs = 6000;
+  // Walk 15 gentle footsteps: small peak (1.06g) and small valley (0.95g)
+  for (let step = 0; step < 15; step++) {
+    detector.updateAccelerometer({ x: 0.05, y: 0.1, z: 1.06 }, nowMs);
+    nowMs += 200;
+    detector.updateAccelerometer({ x: 0.05, y: 0.1, z: 0.95 }, nowMs);
+    nowMs += 450; // total 650ms per step
+  }
+
+  // Steps should be detected despite delayed start and gentle movements
+  assert.ok(detector.getCurrentLapSteps() >= 14, `Expected at least 14 steps, got ${detector.getCurrentLapSteps()}`);
+
+  // Test manual step adjustment
+  detector.adjustSteps(3);
+  assert.ok(detector.getCurrentLapSteps() >= 17);
+  detector.adjustSteps(-2);
+  assert.ok(detector.getCurrentLapSteps() >= 15);
+
+  // Pausing in middle: pause 8 seconds
+  nowMs += 8000;
+  for (let step = 0; step < 5; step++) {
+    detector.updateAccelerometer({ x: 0.05, y: 0.1, z: 1.08 }, nowMs);
+    nowMs += 200;
+    detector.updateAccelerometer({ x: 0.05, y: 0.1, z: 0.94 }, nowMs);
+    nowMs += 400;
+  }
+  assert.ok(detector.getCurrentLapSteps() >= 20);
+
+  // Calibration succeeds
+  const calResult = detector.completeCalibration(nowMs);
+  assert.equal(calResult.success, true);
+});
+
 test('PradakshinaLoopDetector - supports reset', () => {
   const detector = new PradakshinaLoopDetector();
   detector.startCalibration(1000);
