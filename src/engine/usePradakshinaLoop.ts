@@ -12,6 +12,7 @@ import {
 interface UsePradakshinaLoopOptions {
   enabled: boolean;
   isPaused?: boolean;
+  autoConfirm?: boolean;
   onLapDetected: () => void;
 }
 
@@ -20,20 +21,29 @@ const ACCEL_INTERVAL_MS = 40; // 25 Hz is optimal & battery-efficient for human 
 export function usePradakshinaLoop({
   enabled,
   isPaused = false,
+  autoConfirm = false,
   onLapDetected,
 }: UsePradakshinaLoopOptions) {
-  const detectorRef = useRef(new PradakshinaLoopDetector());
+  const detectorRef = useRef(
+    new PradakshinaLoopDetector(undefined, { autoConfirmLaps: autoConfirm })
+  );
   const onLapDetectedRef = useRef(onLapDetected);
+  const hasNotifiedPaceRef = useRef(false);
 
   const [phase, setPhase] = useState<PradakshinaPhase>('IDLE');
   const [profile, setProfile] = useState<PradakshinaLoopProfile | null>(null);
   const [currentLapSteps, setCurrentLapSteps] = useState(0);
   const [lapProgress, setLapProgress] = useState(0);
   const [completedLaps, setCompletedLaps] = useState(0);
+  const [isLapPacedReady, setIsLapPacedReady] = useState(false);
 
   useEffect(() => {
     onLapDetectedRef.current = onLapDetected;
   }, [onLapDetected]);
+
+  useEffect(() => {
+    detectorRef.current.setAutoConfirmLaps(autoConfirm);
+  }, [autoConfirm]);
 
   const triggerLapFeedback = useCallback(() => {
     // Distinct double-buzz pattern for pocket feedback
@@ -48,19 +58,40 @@ export function usePradakshinaLoop({
       setCurrentLapSteps(event.currentLapSteps);
       setLapProgress(event.lapProgress);
       setCompletedLaps(event.completedLaps);
+      setIsLapPacedReady(event.lapPacedEstimate);
 
       if (event.stepDetected && detectorRef.current.getPhase() === 'CALIBRATING') {
         // Subtle tick indicating step counted
         void Haptics.selectionAsync().catch(() => {});
       }
 
+      if (event.lapPacedEstimate && !hasNotifiedPaceRef.current) {
+        hasNotifiedPaceRef.current = true;
+        // Paced haptic pulse indicating round distance reached
+        void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+      } else if (!event.lapPacedEstimate) {
+        hasNotifiedPaceRef.current = false;
+      }
+
       if (event.lapDetected) {
+        hasNotifiedPaceRef.current = false;
+        setIsLapPacedReady(false);
         triggerLapFeedback();
         onLapDetectedRef.current();
       }
     },
     [triggerLapFeedback]
   );
+
+  const recordLap = useCallback(() => {
+    const event = detectorRef.current.recordLap();
+    setCurrentLapSteps(event.currentLapSteps);
+    setLapProgress(event.lapProgress);
+    setCompletedLaps(event.completedLaps);
+    setIsLapPacedReady(false);
+    hasNotifiedPaceRef.current = false;
+    triggerLapFeedback();
+  }, [triggerLapFeedback]);
 
   const adjustSteps = useCallback((delta: number) => {
     const updated = detectorRef.current.adjustSteps(delta);
@@ -108,6 +139,8 @@ export function usePradakshinaLoop({
     setCurrentLapSteps(0);
     setLapProgress(0);
     setCompletedLaps(0);
+    setIsLapPacedReady(false);
+    hasNotifiedPaceRef.current = false;
   }, []);
 
   // Sensor listener loop
@@ -167,8 +200,10 @@ export function usePradakshinaLoop({
     currentLapSteps,
     lapProgress,
     completedLaps,
+    isLapPacedReady,
     startCalibration,
     completeCalibration,
+    recordLap,
     adjustSteps,
     setSteps,
     reset,

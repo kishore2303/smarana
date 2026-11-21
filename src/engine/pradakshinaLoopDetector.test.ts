@@ -31,8 +31,34 @@ test('PradakshinaLoopDetector - handles calibration flow', () => {
   assert.equal(detector.getCurrentLapSteps(), 0); // Ready for Round 2
 });
 
-test('PradakshinaLoopDetector - detects subsequent auto laps based on step baseline', () => {
+test('PradakshinaLoopDetector - default Assisted Pacer signals lapPacedEstimate and records lap on deity checkpoint', () => {
   const detector = new PradakshinaLoopDetector();
+  detector.startCalibration(1000);
+  detector.addSteps(30, 25000);
+  detector.completeCalibration(25000);
+
+  assert.equal(detector.getCompletedLaps(), 1);
+  assert.equal(detector.isAutoConfirmLaps(), false); // Default is guarded assisted pacing
+
+  // Walk 30 steps of Round 2
+  const event = detector.addSteps(30, 50000);
+  // Must NOT auto-decrement without devotee confirmation
+  assert.equal(event.lapDetected, false);
+  // Must signal that estimated distance has been reached
+  assert.equal(event.lapPacedEstimate, true);
+  assert.equal(event.currentLapSteps, 30);
+  assert.equal(detector.getCompletedLaps(), 1);
+
+  // Devotee arrives in front of deity and confirms round (taps screen / checkpoint button)
+  const checkpointEvent = detector.recordLap(51000);
+  assert.equal(checkpointEvent.lapDetected, true);
+  assert.equal(checkpointEvent.completedLaps, 2);
+  assert.equal(checkpointEvent.currentLapSteps, 0); // Reset for Round 3
+  assert.equal(checkpointEvent.lapProgress, 0);
+});
+
+test('PradakshinaLoopDetector - detects subsequent auto laps based on step baseline when auto-confirm is enabled', () => {
+  const detector = new PradakshinaLoopDetector(undefined, { autoConfirmLaps: true });
   detector.startCalibration(1000);
   detector.addSteps(60, 45000);
   detector.completeCalibration(45000);
@@ -134,7 +160,7 @@ test('PradakshinaLoopDetector - handles delayed start and genuine walking withou
 });
 
 test('PradakshinaLoopDetector - compass heading enforces closed 360 loop and rejects straight walking', () => {
-  const detector = new PradakshinaLoopDetector();
+  const detector = new PradakshinaLoopDetector(undefined, { autoConfirmLaps: true });
   detector.startCalibration(1000);
 
   // Calibrate 25 steps in a circle

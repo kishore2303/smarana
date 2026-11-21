@@ -291,8 +291,35 @@ export function CountdownCounter({
     if (isPocketModeActive) {
       syncNativePocketCount(Math.max(0, session.remainingCount - 1));
     }
+    if (session.mode === 'pradakshina' && pradakshinaLoop.phase === 'TRACKING') {
+      pradakshinaLoop.recordLap();
+    }
     onDecrement();
-  }, [session.status, session.remainingCount, isPocketModeActive, onDecrement]);
+  }, [
+    session.status,
+    session.remainingCount,
+    session.mode,
+    isPocketModeActive,
+    pradakshinaLoop,
+    onDecrement,
+  ]);
+
+  const lastDimTapTimeRef = useRef<number>(0);
+
+  // Require deliberate double-tap on screen in Dim Mode to prevent accidental clothing pocket rubs
+  const handleDimScreenPress = () => {
+    if (isPaused || session.status !== 'active' || session.remainingCount <= 0) {
+      return;
+    }
+    const now = Date.now();
+    const delta = now - lastDimTapTimeRef.current;
+    if (delta >= 100 && delta <= 500) {
+      lastDimTapTimeRef.current = 0;
+      handleCountInput();
+    } else {
+      lastDimTapTimeRef.current = now;
+    }
+  };
 
   const handleUndo = () => {
     if (isPocketModeActive && canUndo) {
@@ -460,12 +487,14 @@ export function CountdownCounter({
     return () => sub.remove();
   }, [isFocused, isDimMode, isCompleted, onClear, handleGuardedHome]);
 
-  // Disable JS foreground back-tap when tab is unfocused or Pocket Mode owns sensors
+  // Disable JS foreground back-tap when tab is unfocused, in Dim Mode, or during Pradakshina
   useBackTap({
     enabled:
       isFocused &&
       settings.backTapEnabled &&
       session.status === 'active' &&
+      session.mode === 'japa' &&
+      !isDimMode &&
       !isPocketModeActive,
     sensitivity: settings.backTapSensitivity,
     onDoubleTap: handleCountInput,
@@ -631,7 +660,7 @@ export function CountdownCounter({
 
           <Pressable
             style={styles.dimTapArea}
-            onPress={handleCountInput}
+            onPress={handleDimScreenPress}
             disabled={isPaused}
             accessibilityRole="button"
             accessibilityLabel={`${session.remainingCount}`}
@@ -676,7 +705,7 @@ export function CountdownCounter({
                   ? t.counter.tapHintPaused
                   : isMeruBannerVisible
                     ? t.counter.meruReached
-                    : t.counter.tapHintScreen}
+                    : t.counter.tapHintDimMode}
             </Text>
           </Pressable>
 
@@ -893,10 +922,32 @@ export function CountdownCounter({
                 <Text style={styles.trackingCurrentSteps}>
                   👣 {pradakshinaLoop.currentLapSteps} / {pradakshinaLoop.profile?.baselineSteps} {t.pradakshina.stepsCount}
                 </Text>
-                <Text style={styles.trackingPocketText} numberOfLines={1}>
-                  {t.pradakshina.pocketHint}
+                <Text
+                  style={[
+                    styles.trackingPocketText,
+                    pradakshinaLoop.isLapPacedReady && styles.trackingPocketTextReady,
+                  ]}
+                  numberOfLines={1}
+                >
+                  {pradakshinaLoop.isLapPacedReady
+                    ? t.pradakshina.pacedEstimateReady
+                    : t.pradakshina.pocketHint}
                 </Text>
               </View>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.finishCalibrateBtn,
+                  pradakshinaLoop.isLapPacedReady && styles.confirmLapHighlightedBtn,
+                  pressed && styles.buttonPressed,
+                  { marginTop: 8 },
+                ]}
+                onPress={handleCountInput}
+                accessibilityRole="button"
+              >
+                <Text style={styles.finishCalibrateBtnText}>
+                  {t.pradakshina.markRoundDone}
+                </Text>
+              </Pressable>
             </View>
           )}
         </View>
@@ -938,9 +989,13 @@ export function CountdownCounter({
                 ? t.counter.meruReached
                 : isPocketModeActive
                   ? t.counter.pocketModeActive
-                  : settings.backTapEnabled
-                    ? `${t.counter.tapHintBackTap} (${sensitivityLabel})`
-                    : t.counter.tapHintScreen}
+                  : session.mode === 'pradakshina'
+                    ? pradakshinaLoop.isLapPacedReady
+                      ? t.counter.tapHintPradakshinaPaced
+                      : t.counter.tapHintPradakshina
+                    : settings.backTapEnabled
+                      ? `${t.counter.tapHintBackTap} (${sensitivityLabel})`
+                      : t.counter.tapHintScreen}
         </Text>
       </Pressable>
 
@@ -1282,6 +1337,15 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     fontSize: 11,
     fontStyle: 'italic',
+  },
+  trackingPocketTextReady: {
+    color: colors.gold,
+    fontWeight: '700',
+  },
+  confirmLapHighlightedBtn: {
+    backgroundColor: '#3D2800',
+    borderColor: colors.gold,
+    borderWidth: 1.5,
   },
   namaPill: {
     backgroundColor: '#0D241C',

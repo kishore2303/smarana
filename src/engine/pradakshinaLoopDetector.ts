@@ -16,6 +16,7 @@ export interface PradakshinaLoopProfile {
 export interface PradakshinaLapEvent {
   stepDetected: boolean;
   lapDetected: boolean;
+  lapPacedEstimate: boolean;
   completedLaps: number;
   currentLapSteps: number;
   baselineSteps: number;
@@ -54,12 +55,24 @@ export class PradakshinaLoopDetector {
   private currentLapSteps = 0;
   private completedLaps = 0;
   private profile: PradakshinaLoopProfile | null = null;
+  private autoConfirmLaps = false;
 
-  constructor(profile?: PradakshinaLoopProfile) {
+  constructor(profile?: PradakshinaLoopProfile, options?: { autoConfirmLaps?: boolean }) {
     if (profile) {
       this.profile = profile;
       this.phase = 'TRACKING';
     }
+    if (options?.autoConfirmLaps !== undefined) {
+      this.autoConfirmLaps = options.autoConfirmLaps;
+    }
+  }
+
+  setAutoConfirmLaps(enabled: boolean): void {
+    this.autoConfirmLaps = enabled;
+  }
+
+  isAutoConfirmLaps(): boolean {
+    return this.autoConfirmLaps;
   }
 
   getPhase(): PradakshinaPhase {
@@ -109,8 +122,38 @@ export class PradakshinaLoopDetector {
 
     // Shortest angular difference between consecutive heading samples (-180° to +180°)
     const diff = ((headingDeg - this.prevHeadingDeg + 540) % 360) - 180;
+    // Reject small step swing micro-jitter (< 3 deg) from phone leg swings
+    if (Math.abs(diff) < 3.0) {
+      return;
+    }
     this.prevHeadingDeg = headingDeg;
     this.accumulatedRotationDeg += diff;
+  }
+
+  /**
+   * Record a completed lap at the Deity Checkpoint (or when devotee confirms round completion).
+   * Increments completed laps, resets lap step accumulator to 0 for next round,
+   * and resets circuit heading tracking.
+   */
+  recordLap(nowMs: number = Date.now()): PradakshinaLapEvent {
+    if (this.phase === 'TRACKING') {
+      this.completedLaps++;
+      this.currentLapSteps = 0;
+      this.accumulatedRotationDeg = 0;
+      this.prevHeadingDeg = null;
+      this.startHeadingDeg = null;
+      this.lapStartMs = nowMs;
+    }
+
+    return {
+      stepDetected: false,
+      lapDetected: true,
+      lapPacedEstimate: false,
+      completedLaps: this.completedLaps,
+      currentLapSteps: this.currentLapSteps,
+      baselineSteps: this.profile?.baselineSteps ?? this.currentLapSteps,
+      lapProgress: this.getLapProgress(),
+    };
   }
 
   /**
@@ -190,6 +233,7 @@ export class PradakshinaLoopDetector {
    */
   addSteps(stepCount: number, nowMs: number = Date.now()): PradakshinaLapEvent {
     let lapDetected = false;
+    let lapPacedEstimate = false;
 
     for (let i = 0; i < stepCount; i++) {
       this.currentLapSteps++;
@@ -206,15 +250,20 @@ export class PradakshinaLoopDetector {
           !this.hasCompass ||
           Math.abs(this.accumulatedRotationDeg) >= MIN_LOOP_ROTATION_DEG;
 
-        if ((reachedBaseline || reachedMinStepsWithTime) && reachedClosedLoop) {
-          lapDetected = true;
-          this.completedLaps++;
-          this.currentLapSteps = 0;
-          this.accumulatedRotationDeg = 0;
-          this.prevHeadingDeg = null;
-          this.startHeadingDeg = null;
-          this.lapStartMs = nowMs;
-          break; // Lap triggered
+        if (reachedBaseline || (reachedMinStepsWithTime && reachedClosedLoop)) {
+          lapPacedEstimate = true;
+
+          // Auto-confirm lap only if autoConfirmLaps is enabled and closed loop criteria met
+          if (this.autoConfirmLaps && reachedClosedLoop) {
+            lapDetected = true;
+            this.completedLaps++;
+            this.currentLapSteps = 0;
+            this.accumulatedRotationDeg = 0;
+            this.prevHeadingDeg = null;
+            this.startHeadingDeg = null;
+            this.lapStartMs = nowMs;
+            break; // Lap triggered
+          }
         }
       }
     }
@@ -222,6 +271,7 @@ export class PradakshinaLoopDetector {
     return {
       stepDetected: stepCount > 0,
       lapDetected,
+      lapPacedEstimate,
       completedLaps: this.completedLaps,
       currentLapSteps: this.currentLapSteps,
       baselineSteps: this.profile?.baselineSteps ?? this.currentLapSteps,
@@ -270,9 +320,15 @@ export class PradakshinaLoopDetector {
       return this.addSteps(1, nowMs);
     }
 
+    const lapPacedEstimate =
+      this.phase === 'TRACKING' &&
+      this.profile !== null &&
+      this.currentLapSteps >= this.profile.baselineSteps;
+
     return {
       stepDetected: false,
       lapDetected: false,
+      lapPacedEstimate,
       completedLaps: this.completedLaps,
       currentLapSteps: this.currentLapSteps,
       baselineSteps: this.profile?.baselineSteps ?? this.currentLapSteps,

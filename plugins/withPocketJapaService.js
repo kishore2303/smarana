@@ -316,14 +316,18 @@ class PocketJapaService : Service(), SensorEventListener {
         detector.updateGyroscope(event.values[0], event.values[1], event.values[2])
       }
       Sensor.TYPE_ACCELEROMETER -> {
-        val detected = detector.processAccelerometer(
-          event.values[0],
-          event.values[1],
-          event.values[2],
-          event.timestamp / 1_000_000L
-        )
-        if (detected) {
-          onAcceptedDoubleTap()
+        // Back-tap detection is strictly reserved for stationary Japa.
+        // Walking footsteps during Pradakshina must never trigger double-taps.
+        if (mode == "japa") {
+          val detected = detector.processAccelerometer(
+            event.values[0],
+            event.values[1],
+            event.values[2],
+            event.timestamp / 1_000_000L
+          )
+          if (detected) {
+            onAcceptedDoubleTap()
+          }
         }
       }
     }

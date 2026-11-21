@@ -57,6 +57,8 @@ export interface TranslationStrings {
     stepsCount: string;
     recalibrate: string;
     minStepsWarning: string;
+    markRoundDone: string;
+    pacedEstimateReady: string;
   };
   japa: {
     eyebrow: string;
@@ -97,6 +99,9 @@ export interface TranslationStrings {
     tapHintScreen: string;
     tapHintBackTap: string;
     tapHintPaused: string;
+    tapHintDimMode: string;
+    tapHintPradakshina: string;
+    tapHintPradakshinaPaced: string;
     undo: string;
     pause: string;
     resume: string;
@@ -381,6 +386,8 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       stepsCount: 'steps',
       recalibrate: 'Re-calibrate',
       minStepsWarning: 'Please walk at least 10 steps before setting loop.',
+      markRoundDone: 'Mark Round Complete (At Deity)',
+      pacedEstimateReady: '✨ Estimated Round Reached · Tap when at Deity',
     },
     japa: {
       eyebrow: 'MANTRA REPETITION',
@@ -421,6 +428,9 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       tapHintScreen: 'Tap anywhere here to count',
       tapHintBackTap: 'Tap screen or double-tap back',
       tapHintPaused: 'Paused — tap Resume below',
+      tapHintDimMode: 'Double-tap screen to count (Pocket-safe)',
+      tapHintPradakshina: 'Tap screen when facing the deity',
+      tapHintPradakshinaPaced: 'Estimated round reached · Tap when facing deity',
       undo: 'Undo',
       pause: 'Pause',
       resume: 'Resume',
@@ -728,6 +738,8 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       stepsCount: 'అడుగులు',
       recalibrate: 'మళ్లీ సెట్ చేయి',
       minStepsWarning: 'దయచేసి కనీసం 10 అడుగులు నడిచిన తర్వాత లూప్ సెట్ చేయండి.',
+      markRoundDone: 'రౌండ్ పూర్తిని నమోదు చేయి (గర్భగుడి వద్ద)',
+      pacedEstimateReady: '✨ అంచనా రౌండ్ పూర్తయింది · గర్భగుడి ఎదుట ట్యాప్ చేయండి',
     },
     japa: {
       eyebrow: 'మంత్ర జపం',
@@ -768,6 +780,9 @@ export const translations: Record<AppLanguage, TranslationStrings> = {
       tapHintScreen: 'లెక్కించడానికి ఇక్కడ ట్యాప్ చేయండి',
       tapHintBackTap: 'స్క్రీన్ ట్యాప్ లేదా ఫోన్ వెనుక డబుల్-ట్యాప్ చేయండి',
       tapHintPaused: 'విరామం — కొనసాగించడానికి Resume నొక్కండి',
+      tapHintDimMode: 'లెక్కింపు కోసం స్క్రీన్‌పై డబుల్-ట్యాప్ చేయండి (పాకెట్-సేఫ్)',
+      tapHintPradakshina: 'గర్భగుడి వద్దకు వచ్చినప్పుడు ట్యాప్ చేయండి',
+      tapHintPradakshinaPaced: 'అంచనా రౌండ్ పూర్తయింది · గర్భగుడి ఎదుట ట్యాప్ చేయండి',
       undo: 'వెనక్కి',
       pause: 'విరామం',
       resume: 'కొనసాగించు',
